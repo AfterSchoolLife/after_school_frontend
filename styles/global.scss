@@ -1,0 +1,467 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import './mixins';
+
+:root {
+    --h1-size: 2.5rem;
+    --h2-size: 2rem;
+    --h3-size: 1.75rem;
+    --h4-size: 1.5rem;
+    --h5-size: 1.20rem;
+    --font-size-base-1: calc(1rem - 1px);
+    --success-color: #249a41;
+    --danger-color: #fd5151;
+
+    --primary-text-color: #000000;
+    --primary-text-color-light: #FFFFFF;
+
+    --primary-color-1: #337ab7;
+    --primary-color-2: #5bc0de;
+    --primary-color-3: #5cb85c;
+    --primary-color-4: #f0ad4e;
+    --primary-color-5: #d9534f;
+    --primary-color-6: #7b5df1;
+
+
+    --primary-background: #f7f7f7;
+    --primary-border: #d3dcdf;
+    --secondary-background: #ffffff;
+    --paper-background: #E1DFDF;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+*::-webkit-scrollbar {
+    background-color: transparent !important;
+}
+
+*::-webkit-scrollbar-track {
+    background-color: transparent !important;
+}
+
+*::-webkit-scrollbar-thumb {
+    border-radius: 20px;
+    border: 4px solid transparent;
+    background-color: #A0A0A0;
+    background-clip: content-box;
+}
+
+html {
+    font-size: 16px;
+}
+
+p {
+    font-size: 1.10rem;
+    line-height: 1.6rem;
+}
+
+.p-important {
+    font-size: 1rem !important;
+    line-height: 1.6rem !important;
+}
+
+h5 {
+    font-size: var(--h5-size);
+    font-family: var(--lilita-font);
+}
+
+h1 {
+    font-size: var(--h1-size);
+    line-height: 3.5rem;
+    font-family: var(--lilita-font);
+}
+
+h4 {
+    font-size: var(--h4-size);
+    font-family: var(--lilita-font);
+}
+
+h3 {
+    font-size: var(--h3-size);
+    font-family: var(--lilita-font);
+}
+
+h2 {
+    font-size: var(--h2-size);
+    line-height: 2.5rem;
+    font-family: var(--lilita-font);
+}
+
+hr {
+    border-color: var(--text-color-level3);
+}
+
+.lilita-font {
+    font-family: var(--lilita-font);
+}
+
+.text-color-primary {
+    color: var(--primary-text-color);
+}
+
+.text-color-primary-light {
+    color: var(--primary-text-color-light);
+}
+
+.primary-background {
+    background-color: var(--primary-background);
+}
+
+.primary-background-4 {
+    background: var(--primary-color-4);
+}
+
+.primary-background-6 {
+    background: var(--primary-color-6);
+}
+
+.paper-background {
+    background: var(--paper-background);
+    ;
+}
+
+.text-color-primary-3 {
+    color: var(--primary-color-3);
+}
+
+.text-color-primary-1 {
+    color: var(--primary-color-1);
+}
+
+.text-color-primary-2 {
+    color: var(--primary-color-2);
+}
+
+.text-color-primary-6 {
+    color: var(--primary-color-6);
+}
+
+.text-color-primary-4 {
+    color: var(--primary-color-4);
+}
+
+.text-color-level-3 {
+    color: var(--text-color-level3);
+}
+
+.text-base-1 {
+    font-size: var(--font-size-base-1);
+}
+
+.text-success {
+    color: var(--success-color);
+}
+
+.text-danger {
+    color: var(--danger-color);
+}
+
+.pb-0-important {
+    padding-bottom: 0 !important;
+}
+
+.pt-0-important {
+    padding-top: 0 !important;
+}
+
+.pb-4-important {
+    padding-bottom: 1rem !important;
+}
+
+.page-height {
+    height: calc(100vh - 136px);
+}
+
+.card-image {
+    height: 180px;
+    border-radius: 24px;
+}
+
+.card {
+    border-radius: 24px !important;
+}
+
+button {
+    font-size: calc(1rem - 1px) !important;
+    text-transform: unset !important;
+    border-radius: 24px !important;
+}
+
+.linearprogress {
+    margin: auto;
+    width: 60%;
+    padding-top: 2rem;
+}
+
+// Navbar
+.round-button {
+    border: 2px solid var(--primary-color-6) !important;
+    padding: 1px !important;
+}
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+
+    img {
+        width: 225px;
+        mix-blend-mode: multiply;
+        height: 120px;
+    }
+
+    button {
+        border-radius: 24px !important;
+    }
+}
+
+.shopping-card-button {
+    opacity: 0.75;
+    position: fixed !important;
+    z-index: 75;
+    right: 20px;
+    bottom: 20px;
+
+    button {
+        border-radius: 50% !important;
+        padding: 12px !important;
+    }
+}
+
+.shopping-card-button:hover {
+    opacity: 1;
+}
+
+
+
+//common
+
+.banner-0 {
+    img {
+        height: 520px;
+        width: 100%;
+        object-fit: cover;
+    }
+}
+
+.info-div {
+    height: 100px;
+    font-weight: 500;
+    gap: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+//Home page
+
+.banner {
+    img {
+        height: 420px;
+        width: 100%;
+        object-fit: cover;
+    }
+}
+
+.banner-2 {
+    position: relative;
+
+    img {
+        height: 470px;
+        width: 75%;
+        object-fit: cover;
+    }
+
+    .banner2-description {
+        height: 100%;
+        position: absolute;
+        top: 0;
+        width: 30%;
+        right: 0;
+    }
+}
+
+.program-img {
+    height: 400px;
+    object-fit: cover;
+}
+
+// Authorization
+.auth-card {
+    width: 80%;
+    min-width: 290px;
+    max-width: 420px;
+    margin: auto;
+    margin-top: 48px;
+}
+
+.auth-form {
+    input {
+        background-color: var(--primary-background);
+    }
+}
+
+.auth-register-card {
+    width: 80%;
+    max-width: 1100px;
+    margin: auto;
+    margin-top: 48px;
+    margin-bottom: 48px;
+}
+
+.auth-register-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem;
+    padding-top: 2rem;
+    align-items: end;
+
+    input {
+        background-color: var(--primary-background);
+    }
+
+    .form-div {
+        width: calc(50% - 1rem);
+    }
+}
+
+// Schools
+
+.time-div>div {
+    width: 100%;
+    // padding-top: 0px;
+}
+
+.schedule-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+    padding-top: 1rem;
+
+    .form-div {
+        width: calc(33.3% - 1rem);
+    }
+}
+.school-img {
+    height: calc(100vh - 136px);
+    object-fit: cover;
+}
+
+// shop
+
+.banner-text {
+    position: absolute;
+    top: 100px;
+    padding: 2rem;
+}
+
+.shop-input {
+    input {
+        background-color: var(--primary-background);
+    }
+
+}
+
+.shopping-card {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+
+    .description {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .card-content {
+        padding-bottom: 4px !important;
+    }
+}
+
+
+.cart-card {
+    .description {
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+}
+
+
+// Programs page
+
+.full-banner {
+    img {
+        height: calc(100vh - 136px);
+        width: 100%;
+        object-fit: cover;
+    }
+}
+
+.banner-card {
+    position: absolute;
+    top: 10%;
+    right: 10%;
+}
+
+.MuiAutocomplete-popup {
+    z-index: 999999 !important;
+}
+
+.summer-camp-section {
+    padding: 4rem;
+    img {
+        border-radius: 26px;
+        object-fit: cover;
+    }
+}
+
+.program-card {
+    padding: 0px !important;
+}
+
+.program-week {
+    width: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+.program-chip {
+    border: 2px solid var(--primary-color-5) !important;
+    color: var(--primary-color-5) !important;
+    font-weight: 600;
+}
+
+//Work for us
+
+.work-register-card {
+    width: 80%;
+    max-width: 1100px;
+    margin: auto;
+    margin-top: 48px;
+    margin-bottom: 48px;
+}
+
+//Profile
+
+.student-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+    padding-top: 1rem;
+
+    .form-div {
+        width: calc(33.3% - 1rem);
+    }
+}
