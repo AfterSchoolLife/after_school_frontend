@@ -40,7 +40,6 @@ const Shop = () => {
     const addToCart = (id) => {
         setDisableProduct(id)
         axiosInstance.post('/api/v1/carts', {
-            "quantity": 1,
             "product_id": id
         }).then((response) => {
             setDisableProduct('')

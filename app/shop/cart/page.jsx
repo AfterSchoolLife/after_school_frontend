@@ -108,8 +108,8 @@ const ShoppingCart = () => {
                         <h5 className='pb-2'>Programs</h5>
                         <Divider />
                         <div className='p-4 pt-8'>
-                            {productDetails['Programs'].map(pr => {
-                                return <Card key={pr.schedule.id} className='mb-4 card'>
+                            {productDetails['Programs'].map((pr,index) => {
+                                return <Card key={index} className='mb-4 card'>
                                     <div className='p-4'>
                                         <div className='flex gap-4'>
                                             {pr.schedule.program.image_url ? <CardMedia

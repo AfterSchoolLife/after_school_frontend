@@ -17,7 +17,7 @@ dayjs.extend(timezone);
 
 const week_days = [{ value: "Monday", display: 'M' }, { value: "Tuesday", display: 'T' }, { value: "Wednesday", display: 'W' }, { value: 'Thursday', display: 'T' }, { value: 'Friday', display: 'F' }]
 const AfterSchoolPage = () => {
-  const [school_id,setSchoolId] = useState(useSearchParams().get('id'))
+  const [school_id, setSchoolId] = useState(useSearchParams().get('id'))
   const [scheduleData, setScheduleData] = useState({})
   const [schoolDetail, setSchoolDetail] = useState(null)
   const [fetchingData, setFetchingData] = useState('loading')
@@ -27,21 +27,21 @@ const AfterSchoolPage = () => {
   useEffect(() => {
     fetchSchoolsData()
   }, [])
-  const fetchSchedules = (id=null) => {
-    const fetchId = id ? id :school_id
-    if (fetchId)
-    {
+  const fetchSchedules = (id = null) => {
+    const fetchId = id ? id : school_id
+    if (fetchId) {
       setSchoolId(fetchId)
     }
-    axios.get(`http://localhost:4000/api/v1/getSchedules?schoolId=${fetchId}`).then((response) => {
+    axiosInstance.get(`http://localhost:4000/api/v1/getSchedules?schoolId=${fetchId}`).then((response) => {
       setScheduleData(response.data)
       setFetchingData('success')
     }).catch(() => { })
   }
-  const fetchSchoolsData = (id=null) => {
+  const fetchSchoolsData = (id = null) => {
     fetchSchools().then(response => {
       setSelectData(response.data)
-      const school_data = response.data.filter(r => r.id == school_id)
+      const school_data = response.data.filter(r => r.id == (id || school_id))
+      console.log(school_data)
       if (school_data.length) {
         setSchoolDetail(school_data[0])
         fetchSchedules(id)
@@ -49,20 +49,19 @@ const AfterSchoolPage = () => {
     })
   }
   const addToCart = (id) => {
-        axiosInstance.post('/api/v1/carts', {
-            "quantity": 1,
-            "schedule_id": id
-        }).then((response) => {
-            setUserDetails((prevData) => {
-                prevData.cart.data.push(response.data)
-                return {
-                    ...prevData,
-                }
-            })
-            console.log(response)
-        }).catch(() => {
-        })
-    }
+    axiosInstance.post('/api/v1/carts', {
+      "schedule_id": id
+    }).then((response) => {
+      setUserDetails((prevData) => {
+        prevData.cart.data.push(response.data)
+        return {
+          ...prevData,
+        }
+      })
+      console.log(response)
+    }).catch(() => {
+    })
+  }
   return <section className={`p-12 ${lilita.variable}`}>
     {
       fetchingData == 'loading' ? <div className="linearprogress"><LinearProgress variant="indeterminate" /></div> : <Fragment>
@@ -75,7 +74,7 @@ const AfterSchoolPage = () => {
             id="school-select"
             value={school_id}
             label="Select School"
-            onChange={(e) => {fetchSchoolsData(e.target.value)}}
+            onChange={(e) => { fetchSchoolsData(e.target.value) }}
           >
             {
               selectData.map((school) => {
@@ -85,7 +84,7 @@ const AfterSchoolPage = () => {
           </Select>
         </FormControl>
         <div style={{ maxWidth: '1100px', margin: 'auto' }} className='pt-8'>
-          {scheduleData.map(schedule => {
+          {scheduleData.length ? <>{scheduleData.map(schedule => {
             return <Card sx={{ width: '100%', marginLeft: 'auto', marginRight: 'auto' }} className="card mb-6" key={schedule.id}>
               <div className='p-4'>
                 <div className='flex gap-4'>
@@ -110,15 +109,18 @@ const AfterSchoolPage = () => {
                       <p className='text-color-primary-1'><CalendarTodayIcon fontSize='small' className='pr-1'></CalendarTodayIcon>{new Date(schedule.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - {new Date(schedule.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                       <p className='text-color-primary-1'><AccessTimeIcon fontSize='small' className='pr-1'></AccessTimeIcon>{dayjs.tz(schedule.start_time, 'UTC').format('h:mm A')} - {dayjs.tz(schedule.end_time, 'UTC').format('h:mm A')}</p>
                     </div>
-                    <div className='text-end pt-4 flex justify-end gap-4 items-center'>
-                      <p className='text-3xl text-color-primary-3'>${schedule.price}</p>
-                      <Button onClick={() => {addToCart(schedule.id)}} variant='contained'>Add to Cart</Button>
+                    <div className='text-end pt-4 flex justify-between gap-4 items-center'>
+                      <p className='font-bold'>Available Slots: {schedule.currently_available}</p>
+                      <div className='flex items-center gap-4'>
+                        <p className='text-3xl text-color-primary-3'>${schedule.price}</p>
+                        <Button onClick={() => { addToCart(schedule.id) }} variant='contained'>Add to Cart</Button>
+                      </div>
                     </div>
                   </CardContent>
                 </div>
               </div>
             </Card>
-          })}
+          })}</> : <p className='text-2xl text-center pt-4'>No Active Programs found for this school</p>}
         </div>
       </Fragment>
     }

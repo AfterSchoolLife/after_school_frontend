@@ -5,6 +5,7 @@ import axios from 'axios'
 import { forwardRef, useEffect, useState } from "react";
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import axiosInstance from "@components/axiosInstance";
 
 const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -31,7 +32,7 @@ const ProgramAdmin = () => {
         setIsActive(is_active)
         setFetchStatus('loading')
         setProgramDetails([])
-        axios.get(`http://127.0.0.1:4000/api/v1/programs?isActive=${is_active}`).then((response) => {
+        axiosInstance.get(`http://127.0.0.1:4000/api/v1/programs?isActive=${is_active}`).then((response) => {
             setProgramDetails(response.data)
             setFetchStatus('success')
         }).catch(() => {

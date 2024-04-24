@@ -25,7 +25,7 @@ const Work = () => {
         </div>
         <div className='info-div primary-background-6 text-color-primary-light'>
             <h3>Explore Job Openings</h3>
-            <Link href="/">
+            <Link href="/work/apply">
                 <Button variant="contained" color="primary3">
                     <h5>Click here</h5>
                 </Button>

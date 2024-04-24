@@ -50,7 +50,7 @@ const Login = () => {
                             fullWidth
                             required
                         />
-                        <Link href="/register"><p className="pt-4 text-base underline">Forgot/Reset Password?</p></Link>
+                        {/* <Link href="/register"><p className="pt-4 text-base underline">Forgot/Reset Password?</p></Link> */}
                         <div className="flex justify-between pt-2">
                             <Link href="/register">
                                 <Button color="primary">

@@ -9,7 +9,6 @@ import {
 } from "@mui/material"
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import axios from 'axios'
 import { forwardRef, useEffect, useState } from "react";
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
@@ -20,11 +19,29 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import dayjs from 'dayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
+import axiosInstance from "@components/axiosInstance";
+import DescriptionIcon from '@mui/icons-material/Description';
+import ExcelJS from 'exceljs';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
+const excelCellData = {
+    'B1':'school_name',
+    'B3': 'program_name',
+    'B7' : 'start_date',
+    'F7' : 'end_date',
+    'F3' : 'day_time',
+    'F1': 'school_address'
+}
+const getDayInt = {
+    'Monday': 1,
+    'Tuesday':2,
+    'Wednesday': 3,
+    'Thursday': 4,
+    'Friday': 5
+}
 const table_headings = ['Program', 'School', 'Days', 'Start Date', 'End Date', 'Start Time', 'End Time', 'Age Group', 'Price']
 const table_value = ['program_name', 'school_name', 'days', 'start_date', 'end_date', 'start_time', 'end_time', 'age_group', 'price']
 const formData_inital = {
@@ -137,8 +154,72 @@ const ScheduleAdmin = () => {
         fetchScheduleDetails(isActive);
         fetchSelectDetails();
     }, [])
+    const countSessions = (startDate, endDate,day) => {
+        let count = 0;
+        let currentDate = new Date(startDate);
+        // Loop through each day between startDate and endDate
+        while (currentDate <= endDate) {
+          // Check if the current day is a Monday (day of the week is 1 for Monday)
+          if (currentDate.getDay() === day) {
+            count++;
+          }
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+        return count;
+      }
+    const setupRoster = (scheduleData) => {
+        axiosInstance.get(`/api/v1/purchaseds/getStudentInfoSchedule/${scheduleData.id}`).then((studentInfo) => {
+            fetch('/after_school_roster.xlsx')
+                .then((response) => response.arrayBuffer())
+                .then((buffer) => {
+                    const workbook = new ExcelJS.Workbook();
+                    return workbook.xlsx.load(buffer);
+                })
+                .then((workbook) => {
+                    const worksheet = workbook.getWorksheet(1);
+                    studentInfo.data.forEach((student,index) => {
+                        worksheet.addRow([index + 1,student.firstname, 
+                            student.lastname,student.grade,'','','','',student.user.parent_1_phone_number,student.pickup,''])
+                    })
+                    let getSessions = countSessions(scheduleData.start_date,scheduleData.end_date,getDayInt[scheduleData.days])
+                    const cell = worksheet.getCell('F5'); // Example: cell A2
+                    cell.value = getSessions
+                    Object.keys(excelCellData).forEach(key => {
+                        const cell = worksheet.getCell(key)
+                        if (excelCellData[key].endsWith('date'))
+                        {
+                            const date_v = scheduleData[excelCellData[key]]   
+                            cell.value = new Date(date_v).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                        }
+                        else if (excelCellData[key] == 'day_time') {
+                            const start_time = dayjs.tz(scheduleData.start_time, 'UTC').format('h:mm A')
+                            const end_time = dayjs.tz(scheduleData.end_time, 'UTC').format('h:mm A')
+                            cell.value = `${scheduleData.days}, ${start_time} - ${end_time}`
+                        }
+                        else {
+                            cell.value = scheduleData[excelCellData[key]]
+                        }
+                    })
+                    // Generate the modified Excel file as a blob
+                    return workbook.xlsx.writeBuffer();
+                })
+                .then((modifiedData) => {
+                    // Create a Blob from the buffer
+                    const blob = new Blob([modifiedData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+                    // Create a download link and trigger the download
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'modified_sample.xlsx';
+                    link.click();
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        }).catch(() => { })
+    }
     const fetchSelectDetails = () => {
-        axios.get(`http://127.0.0.1:4000/api/v1/getall`).then((response) => {
+        axiosInstance.get(`/api/v1/getall`).then((response) => {
             setFormData((prevFormData) => {
                 response.data.schools = response.data.schools.map(v => { return { value: v.id, option: v.name } })
                 response.data.programs = response.data.programs.map(v => { return { value: v.id, option: v.title } })
@@ -158,7 +239,7 @@ const ScheduleAdmin = () => {
         setIsActive(is_active)
         setFetchStatus('loading')
         setScheduleDetails([])
-        axios.get(`http://127.0.0.1:4000/api/v1/schedules?isActive=${is_active}`).then((response) => {
+        axiosInstance.get(`/api/v1/schedules?isActive=${is_active}`).then((response) => {
             setScheduleDetails(response.data)
             setFetchStatus('success')
         }).catch(() => {
@@ -172,7 +253,7 @@ const ScheduleAdmin = () => {
             ...dialogDetails,
             loader: true
         })
-        const url = dialogDetails.type == 'post' ? 'http://127.0.0.1:4000/api/v1/schedules' : `http://127.0.0.1:4000/api/v1/schedules/${formData.id}`
+        const url = dialogDetails.type == 'post' ? '/api/v1/schedules' : `/api/v1/schedules/${formData.id}`
         let data
         if (dialogDetails.type == 'delete') {
             data = undefined
@@ -200,7 +281,7 @@ const ScheduleAdmin = () => {
         else if (dialogDetails.type == 'enable') {
             data.is_active = true
         }
-        axios({
+        axiosInstance({
             method: dialogDetails.type == 'disable' || dialogDetails.type == 'enable' ? 'put' : dialogDetails.type,
             url,
             data
@@ -288,7 +369,7 @@ const ScheduleAdmin = () => {
                 return <p className="text-center">Error occured while fetching data</p>
             case 'success':
                 if (scheduleDetails.length > 0) {
-                    return <div style={{maxWidth:'calc(100vw - 240px - 2rem)'}}>
+                    return <div style={{ maxWidth: 'calc(100vw - 240px - 2rem)' }}>
                         <TableContainer sx={{ width: '95%' }} elevation={3} component={Paper}>
                             <Table sx={{ width: '95%', minWidth: 650, background: 'var(--app-secondary)' }} aria-label="a dense table">
                                 <TableHead sx={{ whiteSpace: 'nowrap' }}>
@@ -319,6 +400,9 @@ const ScheduleAdmin = () => {
                                                         <Button variant="outlined" onClick={() => { openDialog('disable', row) }}>Disable</Button>
                                                         <IconButton onClick={() => { openDialog('put', row) }} aria-label="edit">
                                                             <EditOutlinedIcon />
+                                                        </IconButton>
+                                                        <IconButton onClick={() => { setupRoster(row) }}>
+                                                            <DescriptionIcon />
                                                         </IconButton>
                                                     </> :
                                                         <>
