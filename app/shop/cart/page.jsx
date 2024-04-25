@@ -12,9 +12,11 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import dayjs from 'dayjs'
 import AddStudentComponent from '@components/addStudent';
+import { useRouter } from 'next/navigation';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 const ShoppingCart = () => {
+    const router = useRouter()
     const [userDetails, setUserDetails] = useContext(UserContext)
     const [productDetails, setProductDetails] = useState({
         'Programs': [],
@@ -97,7 +99,7 @@ const ShoppingCart = () => {
     }
     const checkout = (e) => {
         e.preventDefault()
-        console.log(userDetails.cart.data)
+        router.push('/shop/checkout')
     }
     return <section>
         <form onSubmit={checkout} className={`flex gap-8 pt-8 ${lilita.variable}`}>
