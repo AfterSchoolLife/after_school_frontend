@@ -51,34 +51,34 @@ const DetailsComponent = () => {
             <div className="w-full flex gap-4 justify-between pb-4">
                 <div className="w-1/2">
                     <p className="font-bold text-lg">Name</p>
-                    <p className="text-color-primary-1">{userDetails.parent_1_name}</p>
+                    <p className="text-color-primary-1">{userDetails.emergency_1_name}</p>
                 </div>
                 <div className="w-1/2">
                     <p className="font-bold text-lg">Relationship to child</p>
-                    <p className="text-color-primary-1">{userDetails.parent_1_relation}</p>
+                    <p className="text-color-primary-1">{userDetails.emergency_1_relation}</p>
                 </div>
             </div>
             <div className="w-full pb-4">
                 <div className="w-1/2">
                     <p className="font-bold text-lg">Phone Number</p>
-                    <p className="text-color-primary-1">{userDetails.parent_1_phone_number}</p>
+                    <p className="text-color-primary-1">{userDetails.emergency_1_phone_number}</p>
                 </div>
             </div>
             <p className="text-2xl pb-2">Secondary Contact</p>
             <div className="w-full flex gap-4 justify-between pb-4">
                 <div className="w-1/2">
                     <p className="font-bold text-lg">Name</p>
-                    <p className="text-color-primary-1">{userDetails.parent_2_name}</p>
+                    <p className="text-color-primary-1">{userDetails.emergency_2_name}</p>
                 </div>
                 <div className="w-1/2">
                     <p className="font-bold text-lg">Relationship to child</p>
-                    <p className="text-color-primary-1">{userDetails.parent_2_relation}</p>
+                    <p className="text-color-primary-1">{userDetails.emergency_2_relation}</p>
                 </div>
             </div>
             <div className="w-full pb-4">
                 <div className="w-1/2">
                     <p className="font-bold text-lg">Phone Number</p>
-                    <p className="text-color-primary-1">{userDetails.parent_1_phone_number}</p>
+                    <p className="text-color-primary-1">{userDetails.emergency_2_phone_number}</p>
                 </div>
             </div>
         </div>

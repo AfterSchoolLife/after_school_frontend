@@ -54,7 +54,7 @@ const Faq = () => {
     return (<section className={`flex gap-8 flex-col pb-8 pt-8 ${lilita.variable}`}>
         <h4 className="text-center text-color-primary-6">FREQUENTLY ASKED QUESTIONS</h4>
         <h1 className="text-center text-color-primary-1">Discover Answers to Your Curiosity</h1>
-        <h4 className="text-center text-color-primary-3">"Every great solution was once a simple question. Unearth the knowledge you seek with us."</h4>
+        <h4 className="text-center text-color-primary-3">&ldquo;Every great solution was once a simple question. Unearth the knowledge you seek with us.&rdquo</h4>
         <div className="mx-16">
             {faqs.map((faq,index) => {
                 return(<Card key={index} className="mb-8">

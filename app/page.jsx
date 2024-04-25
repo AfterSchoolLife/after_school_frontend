@@ -74,7 +74,7 @@ const Home = () => {
             <div className='h-fit p-4 text-center primary-background'>
               <h4 className='pb-4'>Encouraging Instructors, Teachers and Coaches</h4>
               <p>
-                AfterSchoolLife exclusively engages with expertly-trained, seasoned educators renowned for their ability to motivate students. This approach offers your child an advantageous edge in their learning journey. We regard your child's education with utmost seriousness, ensuring our instructors dedicate themselves fully to fostering students' growth into their finest selves.
+                AfterSchoolLife exclusively engages with expertly-trained, seasoned educators renowned for their ability to motivate students. This approach offers your child an advantageous edge in their learning journey. We regard your child&apos;s education with utmost seriousness, ensuring our instructors dedicate themselves fully to fostering students growth into their finest selves.
               </p>
             </div>
           </div>
@@ -83,7 +83,7 @@ const Home = () => {
       <div className='px-12'>
         <h2 className='font-medium text-center pb-4'>After School Life Partnerships</h2>
         <p>
-          AfterSchoolLife is a dedicated facilitator of enriching after-school activities, as well as comprehensive summer and seasonal camps. We collaborate with premier institutions, community parks, and educational centers nationwide. If you're interested in aligning with our vision, we warmly invite you to connect with us and become part of our community-driven mission!
+          AfterSchoolLife is a dedicated facilitator of enriching after-school activities, as well as comprehensive summer and seasonal camps. We collaborate with premier institutions, community parks, and educational centers nationwide. If you&apos;re interested in aligning with our vision, we warmly invite you to connect with us and become part of our community-driven mission!
         </p>
       </div>
     </section>

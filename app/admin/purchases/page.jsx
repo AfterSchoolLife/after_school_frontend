@@ -12,7 +12,7 @@ const table_label = {
     "lastname": 'Lastname',
     "grade": 'Grade',
 }
-const purchasesComponent = () => {
+const PurchasesComponent = () => {
     const [radioGroupValue, setRadioGroupValue] = useState('program')
     const [disableSelect, setDisableSelect] = useState(true)
     const [scheduleDetails, setScheduleDetails] = useState([])
@@ -307,4 +307,4 @@ const purchasesComponent = () => {
     </section>
 }
 
-export default purchasesComponent;
+export default PurchasesComponent;

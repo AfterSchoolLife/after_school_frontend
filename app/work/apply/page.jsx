@@ -47,7 +47,7 @@ const formData_inital = {
 
 }
 
-const applyComponent = () => {
+const ApplyComponent = () => {
     const [formData, setFormData] = useState(formData_inital)
     const [submitDisabled, setDisabled] = useState(false)
     const formChange = (e) => {
@@ -127,4 +127,4 @@ const applyComponent = () => {
     </section>
 }
 
-export default applyComponent
+export default ApplyComponent

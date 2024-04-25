@@ -28,7 +28,7 @@ const StudentComponent = () => {
                 <div className="flex flex-wrap">
                     {
                         studentData.map(s => {
-                            return <div className="w-1/3">
+                            return <div key={s.id} className="w-1/3">
                                 <Card className="card mr-6 mt-6">
                                     <CardContent>
                                         <div className="pb-2 flex">

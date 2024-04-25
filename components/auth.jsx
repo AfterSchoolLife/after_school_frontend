@@ -7,9 +7,7 @@ import { UserContext } from "./root"
 import Navbar from "./Navbar"
 
 const AuthComponent = ({ children }) => {
-    const router = useRouter()
     const [userDetails, setUserDetails] = useContext(UserContext)
-    const pathName = usePathname()
     const [userInitialized, setUserInitialized] = useState(false)
     useEffect(() => {
         if (localStorage.getItem('after_school_t')) {

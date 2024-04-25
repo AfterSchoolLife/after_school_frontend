@@ -4,7 +4,7 @@ import { lilita } from "@components/themeregistry";
 import { Card, CardContent, Divider } from "@mui/material";
 import Link from "next/link";
 
-const programComponent = () => {
+const ProgramComponent = () => {
     return <section className={`${lilita.variable}`}>
         <div className="full-banner relative">
             <Card className="banner-card card">
@@ -30,8 +30,8 @@ const programComponent = () => {
         </div>
         <div className="p-8">
             <h2 className="text-center pb-4">Get Ready for 2024 Summer Camp !!</h2>
-            <p className="text-lg">We're committed to enriching the lives of young minds through our exceptional after-school
-                program offerings.Our dedication to nurturing the next generation's potential drives us to provide
+            <p className="text-lg">We&apos;re committed to enriching the lives of young minds through our exceptional after-school
+                program offerings.Our dedication to nurturing the next generation&apos;s potential drives us to provide
                 a diverse range of engaging and educational activities tailored to children of all ages. With our
                 age-specific programs, every child can explore their interests, learn at their own pace, and thrive
                 in an environment filled with excitement,knowledge, and new connections.
@@ -41,4 +41,4 @@ const programComponent = () => {
     </section>
 }
 
-export default programComponent;
+export default ProgramComponent;
