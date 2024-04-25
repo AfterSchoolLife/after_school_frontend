@@ -4,6 +4,7 @@ import { useContext, useLayoutEffect, useState } from "react";
 import { lilita } from '@components/themeregistry';
 import { useRouter } from "next/navigation";
 import { UserContext } from "@components/root";
+import axiosInstance from "@components/axiosInstance";
 
 const steps = ['Parent/Guardian Information', 'Emergency Information', 'Create Password'];
 const formData_inital = {
@@ -12,15 +13,15 @@ const formData_inital = {
             label: "Email ID",
             type: "email",
             value: "",
-            // required: true,
-            dummy: true,
-            error: false
+            required: true,
+            error: false,
+            dummy: true
         },
         "parent_1_name": {
             label: "Name",
             type: "text",
             value: "",
-            // required: true,
+            required: true,
             heading: "Parent / Guardian 1",
             error: false
         },
@@ -28,7 +29,7 @@ const formData_inital = {
             label: "Relationship",
             type: "text",
             value: "",
-            // required: true,
+            required: true,
             error: false
         },
         "parent_1_phone_number": {
@@ -36,7 +37,7 @@ const formData_inital = {
             type: "text",
             value: "",
             dummy: true,
-            // required: true,
+            required: true,
             inputProps: { pattern: "[0-9]{10}", minLength: 10, maxLength: 10 },
             error: false
         },
@@ -132,7 +133,7 @@ const Register = () => {
     const [userDetails, setUserDetails] = useContext(UserContext)
     useLayoutEffect(() => {
         if (userDetails.isLoggedin) router.push('/')
-    },[])
+    }, [])
     const [activeStep, setActiveStep] = useState(0);
     const [skipped, setSkipped] = useState(new Set());
     const [formData, setFormData] = useState(formData_inital)
@@ -149,26 +150,42 @@ const Register = () => {
     const checkFormValidity = (e) => {
         e.preventDefault()
         let formValid = true
-        Object.keys(formData[activeStep]).forEach(ele => {
-            console.log(formData[ele])
-            if (formData[activeStep][ele].required) {
-                setFormData((prevFormData) => {
-                    if (!prevFormData[activeStep][ele].value)
-                    {
-                        prevFormData[activeStep][ele].error = true
-                        formValid = false
-                    }
-                    else {
-                        prevFormData[activeStep][ele].error = false
-                    }
-                    return {
-                        ...prevFormData,
-                    }
-                })
+        const setData = {
+            ...formData
+        }
+        Object.keys(setData[activeStep]).forEach(ele => {
+            if (setData[activeStep][ele].required) {
+                if (!setData[activeStep][ele].value) {
+                    setData[activeStep][ele].error = true
+                    formValid = false
+                }
+                else {
+                    setData[activeStep][ele].error = false
+                }
+            }
+        })
+        setFormData((prevFormData) => {
+            return {
+                ...prevFormData,
+                ...setData
             }
         })
         if (formValid) {
-            setActiveStep((prevActiveStep) => prevActiveStep + 1)
+            if (activeStep == 2) {
+                const post_data = {}
+                let steps = [0,1,2]
+                steps.forEach((step) => {
+                    Object.keys(formData[step]).forEach(key => {
+                        post_data[key] = formData[step][key].value
+                    })
+                })
+                axiosInstance.post('/api/v1/auth/signup',{user: post_data}).then(() =>{
+                    router.push('/login')
+                })
+            }
+            else {
+                setActiveStep((prevActiveStep) => prevActiveStep + 1)
+            }
         }
     }
 

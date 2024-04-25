@@ -24,23 +24,20 @@ const ShoppingCart = () => {
     })
     const [disableDelete, setDisableDelete] = useState('')
     const [cartSummary, setCartSummary] = useState({})
-    const [selectData, setSelectData] = useState({})
+    const [studentData, setStudentData] = useState({})
+
     useEffect(() => {
+        console.log(userDetails)
         fetchCartSummary()
         setProductDetails({
             'Programs': userDetails.cart.data.filter(c => c.cart_type == 'cart_schedule'),
             'Products': userDetails.cart.data.filter(c => c.cart_type == 'cart_product')
         })
         let dataTo = {}
-        userDetails.cart.data.forEach(c => {
-            if (c.student_id) {
-                dataTo[c.id] = c.student_id
-            }
-            else {
-                dataTo[c.id] = ''
-            }
+        userDetails.student.forEach(c => {
+            dataTo[c.id] = `${c.firstname} ${c.lastname}`
         })
-        setSelectData(dataTo)
+        setStudentData(dataTo)
     }, [])
     const fetchCartSummary = () => {
         axiosInstance.get('/api/v1/getCartSummary').then((response) => {
@@ -63,39 +60,10 @@ const ShoppingCart = () => {
                 'Programs': userDetails.cart.data.filter(c => c.id != id && c.cart_type == 'cart_schedule'),
                 'Products': userDetails.cart.data.filter(c => c.id != id && c.cart_type == 'cart_product')
             })
-            if (selectData[id]) {
-                setSelectData((prevData) => {
-                    delete prevData[id]
-                    return {
-                        ...prevData
-                    }
-                })
-            }
             setDisableDelete('')
         }).catch(() => {
             setDisableDelete('')
         })
-    }
-    const formChange = (e, id) => {
-        console.log(selectData)
-        setSelectData((prevData) => {
-            prevData[id] = e.target.value
-            return {
-                ...prevData
-            }
-        })
-        setUserDetails((prevData) => {
-            prevData.cart.data.forEach(d => {
-                if (d.id == id) {
-                    d['student_id'] = e.target.value
-                }
-            })
-            console.log(prevData)
-            return {
-                ...prevData
-            }
-        })
-
     }
     const checkout = (e) => {
         e.preventDefault()
@@ -110,7 +78,7 @@ const ShoppingCart = () => {
                         <h5 className='pb-2'>Programs</h5>
                         <Divider />
                         <div className='p-4 pt-8'>
-                            {productDetails['Programs'].map((pr,index) => {
+                            {productDetails['Programs'].map((pr, index) => {
                                 return <Card key={index} className='mb-4 card'>
                                     <div className='p-4'>
                                         <div className='flex gap-4'>
@@ -138,28 +106,13 @@ const ShoppingCart = () => {
                                                     <p className='text-color-primary-1'><CalendarTodayIcon fontSize='small' className='pr-1'></CalendarTodayIcon>{new Date(pr.schedule.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - {new Date(pr.schedule.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} , {pr.schedule.days}</p>
                                                     <p className='text-color-primary-1'><AccessTimeIcon fontSize='small' className='pr-1'></AccessTimeIcon>{dayjs.tz(pr.schedule.start_time, 'UTC').format('h:mm A')} - {dayjs.tz(pr.schedule.end_time, 'UTC').format('h:mm A')}</p>
                                                 </div>
+                                                <div className='pt-2'>
+                                                    <p><span>Student Name: &nbsp;</span>
+                                                        <span className='font-bold'> {studentData[pr.student_id]}</span></p>
+                                                </div>
                                             </CardContent>
                                         </div>
                                     </div>
-                                    <CardActions className='flex items-center justify-end mr-4 mb-4'>
-                                        <FormControl sx={{ minWidth: 220 }} required>
-                                            <InputLabel id={String(pr.id) + 'select'}>Select Student</InputLabel>
-                                            <Select
-                                                id={String(pr.id)}
-                                                value={selectData[pr.id]}
-                                                labelId={String(pr.id) + 'select'}
-                                                label="Select Student"
-                                                onChange={(e) => { formChange(e, pr.id) }}
-                                            >
-                                                {
-                                                    userDetails.student.length ? userDetails.student.map((student) => {
-                                                        return <MenuItem key={student.id} value={student.id}>{student.firstname} {student.lastname}</MenuItem>
-                                                    }) : <MenuItem disabled>No Student Information found </MenuItem>
-                                                }
-                                            </Select>
-                                        </FormControl>
-                                        <AddStudentComponent></AddStudentComponent>
-                                    </CardActions>
                                 </Card>
                             })}
                         </div>
@@ -190,28 +143,13 @@ const ShoppingCart = () => {
                                                     <p className='text-xl font-bold'>{prod.product.title}</p>
                                                     <p className='description'>{prod.product.description}</p>
                                                 </div>
+                                                <div className='pt-2'>
+                                                    <p><span>Student Name: &nbsp;</span>
+                                                        <span className='font-bold'> {studentData[prod.student_id]}</span></p>
+                                                </div>
                                             </CardContent>
                                         </div>
                                     </div>
-                                    <CardActions className='flex items-center justify-end mr-4 mb-4'>
-                                        <FormControl sx={{ minWidth: 220 }} required>
-                                            <InputLabel id={String(prod.id) + 'select'}>Select Student</InputLabel>
-                                            <Select
-                                                id={String(prod.id)}
-                                                value={selectData[prod.id]}
-                                                labelId={String(prod.id) + 'select'}
-                                                label="Select Student"
-                                                onChange={(e) => { formChange(e, prod.id) }}
-                                            >
-                                                {
-                                                    userDetails.student.length ? userDetails.student.map((student) => {
-                                                        return <MenuItem key={student.id} value={student.id}>{student.firstname} {student.lastname}</MenuItem>
-                                                    }) : <MenuItem disabled>No Student Information found </MenuItem>
-                                                }
-                                            </Select>
-                                        </FormControl>
-                                        <AddStudentComponent></AddStudentComponent>
-                                    </CardActions>
                                 </Card>
                             })}
                         </div>
@@ -237,7 +175,7 @@ const ShoppingCart = () => {
                         </div>
                     </div>
                     <div className='px-6'>
-                        <Button sx={{borderRadius: '26px'}} type='submit' color='primary3' className='w-full' variant='contained'><p className='text-xl'>Go to Checkout</p></Button>
+                        <Button sx={{ borderRadius: '26px' }} type='submit' color='primary3' className='w-full' variant='contained'><p className='text-xl'>Go to Checkout</p></Button>
                     </div>
                 </div>
             </div>

@@ -12,6 +12,7 @@ import timezone from 'dayjs/plugin/timezone';
 import dayjs from 'dayjs'
 import { UserContext } from '@components/root'
 import axiosInstance from '@components/axiosInstance'
+import Link from 'next/link'
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -22,6 +23,7 @@ const AfterSchoolPage = () => {
   const [schoolDetail, setSchoolDetail] = useState(null)
   const [fetchingData, setFetchingData] = useState('loading')
   const [selectData, setSelectData] = useState([])
+  const [studentSelectData, setStudentSelectData] = useState({})
   const [userDetails, setUserDetails] = useContext(UserContext)
 
   useEffect(() => {
@@ -32,7 +34,12 @@ const AfterSchoolPage = () => {
     if (fetchId) {
       setSchoolId(fetchId)
     }
-    axiosInstance.get(`http://localhost:4000/api/v1/getSchedules?schoolId=${fetchId}`).then((response) => {
+    axiosInstance.get(`/api/v1/getSchedules?schoolId=${fetchId}`).then((response) => {
+      const set_data = {}
+      response.data.forEach(v => {
+        set_data[v.id] = ''
+      })
+      setStudentSelectData(set_data)
       setScheduleData(response.data)
       setFetchingData('success')
     }).catch(() => { })
@@ -48,9 +55,11 @@ const AfterSchoolPage = () => {
       }
     })
   }
-  const addToCart = (id) => {
+  const addToCart = (e,id) => {
+    e.preventDefault()
     axiosInstance.post('/api/v1/carts', {
-      "schedule_id": id
+      "schedule_id": id,
+      "student_id": studentSelectData[id]
     }).then((response) => {
       setUserDetails((prevData) => {
         prevData.cart.data.push(response.data)
@@ -58,9 +67,17 @@ const AfterSchoolPage = () => {
           ...prevData,
         }
       })
-      console.log(response)
     }).catch(() => {
     })
+  }
+  const formChange = (e,id) => {
+    setStudentSelectData((prevData) => {
+      prevData[id] = e.target.value
+      return {
+          ...prevData
+      }
+  })
+
   }
   return <section className={`p-12 ${lilita.variable}`}>
     {
@@ -86,39 +103,64 @@ const AfterSchoolPage = () => {
         <div style={{ maxWidth: '1100px', margin: 'auto' }} className='pt-8'>
           {scheduleData.length ? <>{scheduleData.map(schedule => {
             return <Card sx={{ width: '100%', marginLeft: 'auto', marginRight: 'auto' }} className="card mb-6" key={schedule.id}>
-              <div className='p-4'>
-                <div className='flex gap-4'>
-                  {schedule.image_url ? <CardMedia
-                    sx={{ width: 220, height: 123.75, borderRadius: 26, backgroundColor: "var(--secondary-background)", backgroundPosition: 'center', backgroundSize: 'contain' }}
-                    image={prod.product.image_url}
-                    title="green iguana"
-                  /> : <div style={{ borderRadius: 26, width: 220, height: 123.75, backgroundColor: "var(--secondary-background)" }}></div>}
+              <form onSubmit={(e) => { addToCart(e,schedule.id) }}>
+                <div className='p-4'>
+                  <div className='flex gap-4'>
+                    {schedule.image_url ? <CardMedia
+                      sx={{ width: 220, height: 123.75, borderRadius: 26, backgroundColor: "var(--secondary-background)", backgroundPosition: 'center', backgroundSize: 'contain' }}
+                      image={prod.product.image_url}
+                      title="green iguana"
+                    /> : <div style={{ borderRadius: 26, width: 220, height: 123.75, backgroundColor: "var(--secondary-background)" }}></div>}
 
-                  <CardContent sx={{ width: 'calc(100% - 220px - 1rem)' }} className='program-card'>
-                    <div className='flex justify-between items-center pb-2'>
-                      <h4>{schedule.program_name}</h4>
-                      <Chip className='program-chip' label={schedule.age_group} variant="outlined" />
-                    </div>
-                    <p>{schedule.program_description}</p>
-                    <div className='flex items-center justify-between w-full pt-4'>
-                      <div className='flex gap-2'>
-                        {week_days.map(week => {
-                          return <div style={{ borderRadius: 8, border: `${schedule.days == week.value ? '3px solid var(--primary-color-1)' : '1px solid'}` }} className='program-week' key={week.value}>{week.display}</div>
-                        })}
+                    <CardContent sx={{ width: 'calc(100% - 220px - 1rem)' }} className='program-card'>
+                      <div className='flex justify-between items-center pb-3'>
+                        <div>
+                          <h4 className='pb-1'>{schedule.program_name}</h4>
+                          <Chip className='program-chip' label={schedule.age_group} variant="outlined" />
+                        </div>
+                        <FormControl sx={{ minWidth: 220 }} required>
+                          <InputLabel id={String(schedule.id) + 'select'}>Select Student</InputLabel>
+                          <Select
+                            id={String(schedule.id)}
+                            value={studentSelectData[schedule.id]}
+                            labelId={String(schedule.id) + 'select'}
+                            label="Select Student"
+                            onChange={(e) => { formChange(e, schedule.id) }}
+                          >
+                            <MenuItem>
+                            <Link className='text-color-primary-1' href="/profile/">
+                                Add Student...
+                              </Link>
+                            </MenuItem>
+                            {
+                              userDetails.student.map((student) => {
+                                return <MenuItem key={student.id} value={student.id}>{student.firstname} {student.lastname}</MenuItem>
+                              })
+                            }
+                          </Select>
+                        </FormControl>
                       </div>
-                      <p className='text-color-primary-1'><CalendarTodayIcon fontSize='small' className='pr-1'></CalendarTodayIcon>{new Date(schedule.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - {new Date(schedule.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                      <p className='text-color-primary-1'><AccessTimeIcon fontSize='small' className='pr-1'></AccessTimeIcon>{dayjs.tz(schedule.start_time, 'UTC').format('h:mm A')} - {dayjs.tz(schedule.end_time, 'UTC').format('h:mm A')}</p>
-                    </div>
-                    <div className='text-end pt-4 flex justify-between gap-4 items-center'>
-                      <p className='font-bold'>Available Slots: {schedule.currently_available}</p>
-                      <div className='flex items-center gap-4'>
-                        <p className='text-3xl text-color-primary-3'>${schedule.price}</p>
-                        <Button onClick={() => { addToCart(schedule.id) }} variant='contained'>Add to Cart</Button>
+                      <p>{schedule.program_description}</p>
+                      <div className='flex items-center justify-between w-full pt-4'>
+                        <div className='flex gap-2'>
+                          {week_days.map(week => {
+                            return <div style={{ borderRadius: 8, border: `${schedule.days == week.value ? '3px solid var(--primary-color-1)' : '1px solid'}` }} className='program-week' key={week.value}>{week.display}</div>
+                          })}
+                        </div>
+                        <p className='text-color-primary-1'><CalendarTodayIcon fontSize='small' className='pr-1'></CalendarTodayIcon>{new Date(schedule.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - {new Date(schedule.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                        <p className='text-color-primary-1'><AccessTimeIcon fontSize='small' className='pr-1'></AccessTimeIcon>{dayjs.tz(schedule.start_time, 'UTC').format('h:mm A')} - {dayjs.tz(schedule.end_time, 'UTC').format('h:mm A')}</p>
                       </div>
-                    </div>
-                  </CardContent>
+                      <div className='text-end pt-4 flex justify-between gap-4 items-center'>
+                        <p className='font-bold'>Available Slots: {schedule.currently_available}</p>
+                        <div className='flex items-center gap-4'>
+                          <p className='text-3xl text-color-primary-3'>${schedule.price}</p>
+                          <Button type='submit' variant='contained'>Add to Cart</Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </div>
                 </div>
-              </div>
+              </form>
             </Card>
           })}</> : <p className='text-2xl text-center pt-4'>No Active Programs found for this school</p>}
         </div>

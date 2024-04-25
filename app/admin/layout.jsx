@@ -5,13 +5,18 @@ import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } fr
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useContext, useLayoutEffect } from "react";
-const sidenav = [{ label: 'Programs', href: '/admin/programs' }, { label: 'Schools', href: '/admin/schools' }, { label: 'Schedules', href: '/admin/schedules' },{ label: 'Products', href: '/admin/products' },{ label: 'Job Applications', href: '/admin/jobapplication' },{ label: 'Purchase History', href: '/admin/purchases' }]
+const sidenav = [{ label: 'Programs', href: '/admin/programs' }, { label: 'Schools', href: '/admin/schools' }, { label: 'Schedules', href: '/admin/schedules' }, { label: 'Products', href: '/admin/products' }, { label: 'Job Applications', href: '/admin/jobapplication' }, { label: 'Purchase History', href: '/admin/purchases' }]
 const adminLayout = ({ children }) => {
     const router = useRouter()
     const [userDetails, setUserDetails] = useContext(UserContext)
     useLayoutEffect(() => {
-        if (!userDetails.isLoggedin) router.push('/')
-    },[])
+        if (userDetails.isLoggedin && (userDetails.role == 'admin' || userDetails.role == 'super-admin')) {
+
+        }
+        else {
+            router.push('/')
+        }
+    }, [])
     return userDetails.isLoggedin && <section className={lilita.variable}>
         <h1 className="pl-4">Admin</h1>
         <div className="flex gap-4">

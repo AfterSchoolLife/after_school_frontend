@@ -1,6 +1,6 @@
 "use client"
 import { lilita } from '@components/themeregistry';
-import { Button, LinearProgress, FormControl, TextField, IconButton, Tooltip } from '@mui/material';
+import { Button, LinearProgress, FormControl, TextField, IconButton, Tooltip, InputLabel, Select, MenuItem } from '@mui/material';
 import Link from "next/link";
 import SearchIcon from '@mui/icons-material/Search';
 import Card from '@mui/material/Card';
@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import { UserContext } from '@components/root';
 import axiosInstance from '@components/axiosInstance';
 
+
 const Shop = () => {
     const [userDetails, setUserDetails] = useContext(UserContext)
     const [productDetails, setProductDetails] = useState([])
@@ -19,11 +20,17 @@ const Shop = () => {
     const [fetchStatus, setFetchStatus] = useState('loading')
     const [searchText, setSearchText] = useState('')
     const [disableProduct, setDisableProduct] = useState('')
+    const [studentSelectData, setStudentSelectData] = useState({})
     useEffect(() => {
         fetchProductDetails()
     }, [])
     const fetchProductDetails = () => {
         axiosInstance.get('/api/v1/products?isActive=true').then((response) => {
+            const set_data = {}
+            response.data.forEach(v => {
+                set_data[v.id] = ''
+            })
+            setStudentSelectData(set_data)
             setProductDetails(response.data)
             setFilteredDetails(response.data)
             setFetchStatus('success')
@@ -37,10 +44,12 @@ const Shop = () => {
     const searchProducts = (e) => {
         setFilteredDetails(productDetails.filter(prod => prod.title.toLowerCase().includes(searchText.toLowerCase()) || prod.description.toLowerCase().includes(searchText.toLowerCase())))
     }
-    const addToCart = (id) => {
+    const addToCart = (e,id) => {
+        e.preventDefault()
         setDisableProduct(id)
         axiosInstance.post('/api/v1/carts', {
-            "product_id": id
+            "product_id": id,
+            "student_id": studentSelectData[id]
         }).then((response) => {
             setDisableProduct('')
             setUserDetails((prevData) => {
@@ -53,6 +62,15 @@ const Shop = () => {
         }).catch(() => {
             setDisableProduct('')
         })
+    }
+    const selectChange = (e, id) => {
+        setStudentSelectData((prevData) => {
+            prevData[id] = e.target.value
+            return {
+                ...prevData
+            }
+        })
+
     }
     return userDetails.isLoggedin && <section className={`flex gap-8 flex-col pb-8 ${lilita.variable}`}>
         <div>
@@ -97,30 +115,51 @@ const Shop = () => {
                     {
                         filteredDetails.map((product) => {
                             return <Card key={product.id} className='card shopping-card' sx={{ width: 300 }}>
-                                <div>
-                                    {product.image_url ? <CardMedia
-                                        sx={{ height: 180, backgroundColor: "var(--secondary-background)", backgroundPosition: 'center', backgroundSize: 'contain' }}
-                                        image={product.image_url}
-                                        title="green iguana"
-                                    /> : <div style={{ height: 180, backgroundColor: "var(--secondary-background)" }}></div>}
-                                    <CardContent className='card-content'>
-                                        <h5>
-                                            {product.title}
-                                        </h5>
-                                        <Tooltip title={<p>{product.description}</p>}>
-                                            <p className='description'>
-                                                {product.description}
-                                            </p></Tooltip>
-
-
-                                    </CardContent>
-                                </div>
-                                <CardActions>
-                                    <div className='text-end w-full pb-2 p-2 flex justify-between items-center'>
-                                        <p className='text-3xl text-color-primary-3'>${product.price}</p>
-                                        <Button disabled={disableProduct == product.id} onClick={() => addToCart(product.id)} color='primary' variant='contained'>Add to Cart</Button>
+                                <form onSubmit={(e) => { addToCart(e,product.id) }}>
+                                    <div>
+                                        {product.image_url ? <CardMedia
+                                            sx={{ height: 180, backgroundColor: "var(--secondary-background)", backgroundPosition: 'center', backgroundSize: 'contain' }}
+                                            image={product.image_url}
+                                            title="green iguana"
+                                        /> : <div style={{ height: 180, backgroundColor: "var(--secondary-background)" }}></div>}
+                                        <CardContent className='card-content'>
+                                            <h5>
+                                                {product.title}
+                                            </h5>
+                                            <Tooltip title={<p>{product.description}</p>}>
+                                                <p className='description'>
+                                                    {product.description}
+                                                </p></Tooltip>
+                                        </CardContent>
+                                        <FormControl sx={{ marginLeft: '8px',minWidth: 180, marginTop: '8px' }} required>
+                                            <InputLabel id={String(product.id) + 'select'}>Select Student</InputLabel>
+                                            <Select
+                                                id={String(product.id)}
+                                                value={studentSelectData[product.id]}
+                                                labelId={String(product.id) + 'select'}
+                                                label="Select Student"
+                                                onChange={(e) => { selectChange(e, product.id) }}
+                                            >
+                                                <MenuItem>
+                                                    <Link className='text-color-primary-1' href="/profile/">
+                                                        Add Student...
+                                                    </Link>
+                                                </MenuItem>
+                                                {
+                                                    userDetails.student.map((student) => {
+                                                        return <MenuItem key={student.id} value={student.id}>{student.firstname} {student.lastname}</MenuItem>
+                                                    })
+                                                }
+                                            </Select>
+                                        </FormControl>
                                     </div>
-                                </CardActions>
+                                    <CardActions>
+                                        <div className='text-end w-full pb-2 p-2 flex justify-between items-center'>
+                                            <p className='text-3xl text-color-primary-3'>${product.price}</p>
+                                            <Button type='submit' disabled={disableProduct == product.id} color='primary' variant='contained'>Add to Cart</Button>
+                                        </div>
+                                    </CardActions>
+                                </form>
                             </Card>
                         })
                     }
