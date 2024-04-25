@@ -3,10 +3,12 @@ import Link from "next/link"
 import Button from '@mui/material/Button';
 import { Badge, IconButton, Menu, MenuItem } from "@mui/material";
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import { useContext, useState } from "react";
+import { Fragment, useContext, useState } from "react";
 import { UserContext } from "./root";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import { useRouter } from "next/navigation";
 const Navbar = () => {
+    const router = useRouter()
     const [userDetails, setUserDetails] = useContext(UserContext)
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -16,8 +18,13 @@ const Navbar = () => {
     const handleClose = () => {
         setAnchorEl(null);
     };
+    const logout = () => {
+        localStorage.clear()
+        router.push('/')
+        location.reload()
+    }
     return (
-        <>
+        <Fragment>
             <div>
                 {userDetails.isLoggedin && <Badge className="shopping-card-button" badgeContent={userDetails.cart.data.length} color="primary">
                     <Link href="/shop/cart">
@@ -77,18 +84,18 @@ const Navbar = () => {
                             >
                                 <Link href='/profile/details'><MenuItem onClick={handleClose}>Profile</MenuItem></Link>
                                 {userDetails.role == 'admin' && <Link href='/admin/programs'><MenuItem onClick={handleClose}>Admin</MenuItem></Link>}
-                                <MenuItem onClick={handleClose}>Logout</MenuItem>
+                                <MenuItem onClick={logout}>Logout</MenuItem>
                             </Menu>
                         </div>
                         :
-                        <Link href="/login">
+                        <Link href="/auth/login">
                             <Button variant="contained" color="primary6">
                                 Login
                             </Button>
                         </Link>}
                 </div>
             </nav>
-        </>
+        </Fragment>
     )
 }
 

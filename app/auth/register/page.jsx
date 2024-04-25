@@ -1,5 +1,5 @@
 'use client'
-import { Stepper, Step, StepLabel, Card, CardContent, Button, TextField, InputLabel, FormControl } from "@mui/material"
+import { Stepper, Step, StepLabel, Card, CardContent, Button, TextField, InputLabel, FormControl, Snackbar, CircularProgress } from "@mui/material"
 import { useContext, useLayoutEffect, useState } from "react";
 import { lilita } from '@components/themeregistry';
 import { useRouter } from "next/navigation";
@@ -130,10 +130,11 @@ const formData_inital = {
 }
 const Register = () => {
     const router = useRouter()
-    const [userDetails, setUserDetails] = useContext(UserContext)
-    useLayoutEffect(() => {
-        if (userDetails.isLoggedin) router.push('/')
-    }, [])
+    const [snackBarData, setSnackBarData] = useState({ open: false, msg: '' })
+    const [creating, setCreating] = useState(false)
+    const closeSnackbar = () => {
+        setSnackBarData({ open: false, msg: '' })
+    }
     const [activeStep, setActiveStep] = useState(0);
     const [skipped, setSkipped] = useState(new Set());
     const [formData, setFormData] = useState(formData_inital)
@@ -172,24 +173,39 @@ const Register = () => {
         })
         if (formValid) {
             if (activeStep == 2) {
+                setCreating(true)
                 const post_data = {}
-                let steps = [0,1,2]
+                let steps = [0, 1, 2]
                 steps.forEach((step) => {
                     Object.keys(formData[step]).forEach(key => {
                         post_data[key] = formData[step][key].value
                     })
                 })
-                axiosInstance.post('/api/v1/auth/signup',{user: post_data}).then(() =>{
-                    router.push('/login')
+                axiosInstance.post('/api/v1/auth/signup', { user: post_data }).then(() => {
+                    setCreating(false)
+                    router.push('/auth/login')
+                }).catch((e) => {
+                    setCreating(false)
+                    setSnackBarData({ open: true, msg: e.response.data.status.message })
                 })
             }
             else {
                 setActiveStep((prevActiveStep) => prevActiveStep + 1)
             }
         }
+        else {
+            setSnackBarData({ open: true, msg: 'The form is invalid' })
+        }
     }
 
-    return (!userDetails.isLoggedin && <section className={`${lilita.variable}`}>
+    return <section className={`${lilita.variable}`}>
+        <Snackbar
+            open={snackBarData.open}
+            autoHideDuration={3000}
+            onClose={closeSnackbar}
+            message={snackBarData.msg}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        />
         <Card className="card auth-register-card">
             <CardContent>
                 <div>
@@ -229,21 +245,21 @@ const Register = () => {
                                 })}
                             </div>
                             <div className="flex justify-between pt-4">
-                                {activeStep !== 0 ? <Button variant="outlined" onClick={() => { setActiveStep((prevActiveStep) => prevActiveStep - 1) }} color="primary">
+                                {activeStep !== 0 ? <Button variant="outlined" disabled={creating} onClick={() => { setActiveStep((prevActiveStep) => prevActiveStep - 1) }} color="primary">
                                     Previous
                                 </Button> : <div></div>}
-                                {/* <Button onClick={() => { setActiveStep((prevActiveStep) => prevActiveStep + 1) }} variant="contained" color="primary" type="submit">
-                                    Next
-                                </Button> */}
-                                <Button variant="contained" color="primary" type="submit">
-                                    Next
-                                </Button>
+                                <div className="flex items-center gap-3">
+                                    {creating && <CircularProgress thickness={5} size={32} />}
+                                    <Button disabled={creating} variant="contained" color="primary" type="submit">
+                                        Next
+                                    </Button>
+                                </div>
                             </div>
                         </form>
                     </div>
                 </div>
             </CardContent>
         </Card>
-    </section>)
+    </section>
 }
 export default Register

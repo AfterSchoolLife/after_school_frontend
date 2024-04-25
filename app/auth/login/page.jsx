@@ -1,33 +1,48 @@
 'use client'
-import { Button, Card, CardContent, TextField } from "@mui/material"
+import { Button, Card, CardContent, CircularProgress, Snackbar, TextField } from "@mui/material"
 import Link from "next/link"
 import { lilita } from '@components/themeregistry';
 import axiosInstance from "@components/axiosInstance";
-import { useContext, useLayoutEffect } from "react";
+import { useContext, useLayoutEffect, useState } from "react";
 import { UserContext } from "@components/root";
 import { useRouter } from "next/navigation";
 
 const Login = () => {
     const router = useRouter()
-    const [userDetails, setUserDetails] = useContext(UserContext)
-    useLayoutEffect(() => {
-        console.log(userDetails)
-        if (userDetails.isLoggedin) router.push('/')
-    },[])
+    const [logginIn, setLogginIn] = useState(false)
+    const [snackBarData, setSnackBarData] = useState({ open: false, msg: '' })
     const authenticate_user = (e) => {
         e.preventDefault()
+        setLogginIn(true)
         axiosInstance.post('/api/v1/auth/login', {
             user: {
                 email: e.target['email'].value,
                 password: e.target['password'].value
             }
         }).then((response) => {
-            localStorage.setItem('after_school_t',response.headers.authorization)
+            setLogginIn(false)
+            localStorage.setItem('after_school_t', response.headers.authorization)
             router.push('/')
             location.reload()
-        }).catch(() => { })
+        }).catch((e) => {
+            if (e.response.status == 401) {
+                setSnackBarData({ open: true, msg: e.response.data })
+            }
+            setLogginIn(false)
+        })
     }
-    return (!userDetails.isLoggedin && <section className={`${lilita.variable}`}>
+    const closeSnackbar = () => {
+        setSnackBarData({ open: false, msg: '' })
+    }
+    return <section className={`${lilita.variable}`}>
+
+        <Snackbar
+            open={snackBarData.open}
+            autoHideDuration={3000}
+            onClose={closeSnackbar}
+            message={snackBarData.msg}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} 
+        />
         <div>
             <Card className="card auth-card">
                 <CardContent>
@@ -51,20 +66,23 @@ const Login = () => {
                             required
                         />
                         {/* <Link href="/register"><p className="pt-4 text-base underline">Forgot/Reset Password?</p></Link> */}
-                        <div className="flex justify-between pt-2">
-                            <Link href="/register">
-                                <Button color="primary">
+                        <div className="flex justify-between pt-2 items-center">
+                            <Link href="/auth/register">
+                                <Button disabled={logginIn} color="primary">
                                     Create Account
                                 </Button>
                             </Link>
-                            <Button variant="contained" color="primary" type="submit">
-                                Login
-                            </Button>
+                            <div className="flex gap-2 items-center">
+                                {logginIn && <CircularProgress thickness={5} size={32} />}
+                                <Button disabled={logginIn} variant="contained" color="primary" type="submit">
+                                    Login
+                                </Button>
+                            </div>
                         </div>
                     </form>
                 </CardContent>
             </Card>
         </div>
-    </section>)
+    </section>
 }
 export default Login
