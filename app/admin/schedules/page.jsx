@@ -219,7 +219,7 @@ const ScheduleAdmin = () => {
         }).catch(() => { })
     }
     const fetchSelectDetails = () => {
-        axiosInstance.get(`/api/v1/getall`).then((response) => {
+        axiosInstance.get(`/api/v1/schedules/getAdminAll`).then((response) => {
             setFormData((prevFormData) => {
                 response.data.schools = response.data.schools.map(v => { return { value: v.id, option: v.name } })
                 response.data.programs = response.data.programs.map(v => { return { value: v.id, option: v.title } })
@@ -239,7 +239,7 @@ const ScheduleAdmin = () => {
         setIsActive(is_active)
         setFetchStatus('loading')
         setScheduleDetails([])
-        axiosInstance.get(`/api/v1/schedules?isActive=${is_active}`).then((response) => {
+        axiosInstance.get(`/api/v1/schedules/adminIndex?isActive=${is_active}`).then((response) => {
             setScheduleDetails(response.data)
             setFetchStatus('success')
         }).catch(() => {
@@ -407,9 +407,9 @@ const ScheduleAdmin = () => {
                                                     </> :
                                                         <>
                                                             <Button variant="outlined" onClick={() => { openDialog('enable', row) }}>Enable</Button>
-                                                            <IconButton onClick={() => { openDialog('delete', row, true) }} aria-label="delete">
+                                                            {/* <IconButton onClick={() => { openDialog('delete', row, true) }} aria-label="delete">
                                                                 <DeleteOutlineOutlinedIcon />
-                                                            </IconButton>
+                                                            </IconButton> */}
                                                         </>
                                                     }
                                                 </Stack>

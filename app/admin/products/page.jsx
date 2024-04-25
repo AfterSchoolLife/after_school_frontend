@@ -1,7 +1,6 @@
 'use client'
 import { lilita } from "@components/themeregistry"
 import { Button, Paper, Table, FormControl, TextField, TableBody, TableCell, TableContainer, TableHead, TableRow, LinearProgress, Slide, Dialog, DialogContent, Stack, DialogTitle, IconButton, CircularProgress, FormControlLabel, Switch } from "@mui/material"
-import axios from 'axios'
 import { forwardRef, useEffect, useState } from "react";
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
@@ -33,7 +32,7 @@ const ProductAdmin = () => {
         setIsActive(is_active)
         setFetchStatus('loading')
         setProductDetails([])
-        axiosInstance.get(`http://127.0.0.1:4000/api/v1/products?isActive=${is_active}`).then((response) => {
+        axiosInstance.get(`/api/v1/products/adminIndex?isActive=${is_active}`).then((response) => {
             setProductDetails(response.data)
             setFetchStatus('success')
         }).catch(() => {
@@ -46,7 +45,7 @@ const ProductAdmin = () => {
             ...dialogDetails,
             loader: true
         })
-        const url = dialogDetails.type == 'post' ? 'http://127.0.0.1:4000/api/v1/products' : `http://127.0.0.1:4000/api/v1/products/${formData.id}`
+        const url = dialogDetails.type == 'post' ? '/api/v1/products' : `/api/v1/products/${formData.id}`
         let data = dialogDetails.type == 'delete' ? undefined : { title: formData.title, description: formData.description, price: formData.price, image_url: formData.image_url || ''  }
         console.log(data)
         if (dialogDetails.type == 'disable') {
@@ -55,7 +54,7 @@ const ProductAdmin = () => {
         else if (dialogDetails.type == 'enable') {
             data.is_active = true
         }
-        axios({
+        axiosInstance({
             method: (dialogDetails.type == 'disable') || (dialogDetails.type == 'enable') ? 'put' : dialogDetails.type,
             url,
             data

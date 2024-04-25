@@ -10,14 +10,11 @@ const AdminLayout = ({ children }) => {
     const router = useRouter()
     const [userDetails, setUserDetails] = useContext(UserContext)
     useLayoutEffect(() => {
-        if (userDetails.isLoggedin && (userDetails.role == 'admin' || userDetails.role == 'super-admin')) {
-
-        }
-        else {
+        if (!(userDetails.isLoggedin && (userDetails.role == 'admin' || userDetails.role == 'super-admin'))) {
             router.push('/')
         }
     }, [])
-    return userDetails.isLoggedin && <section className={lilita.variable}>
+    return userDetails.isLoggedin && (userDetails.role == 'admin' || userDetails.role == 'super-admin') && <section className={lilita.variable}>
         <h1 className="pl-4">Admin</h1>
         <div className="flex gap-4">
             <Drawer

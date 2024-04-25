@@ -83,7 +83,7 @@ const Navbar = () => {
                                 }}
                             >
                                 <Link href='/profile/details'><MenuItem onClick={handleClose}>Profile</MenuItem></Link>
-                                {userDetails.role == 'admin' && <Link href='/admin/programs'><MenuItem onClick={handleClose}>Admin</MenuItem></Link>}
+                                {(userDetails.role == 'admin' || userDetails.role == 'super-admin') && <Link href='/admin/programs'><MenuItem onClick={handleClose}>Admin</MenuItem></Link>}
                                 <MenuItem onClick={logout}>Logout</MenuItem>
                             </Menu>
                         </div>

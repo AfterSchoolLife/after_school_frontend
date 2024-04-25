@@ -1,7 +1,6 @@
 'use client'
 import { lilita } from "@components/themeregistry"
-import { Button, Paper, Table, FormControl, TextField, TableBody, TableCell, TableContainer, TableHead, TableRow, LinearProgress, Slide, Dialog, DialogContent, Stack, DialogTitle, IconButton, CircularProgress, FormControlLabel, Switch } from "@mui/material"
-import axios from 'axios'
+import { Button, Paper, Table, FormControl, TextField, TableBody, TableCell, TableContainer, TableHead, TableRow, LinearProgress, Slide, Dialog, DialogContent, Stack, DialogTitle, IconButton, CircularProgress, FormControlLabel, Switch, Snackbar } from "@mui/material"
 import { forwardRef, useEffect, useState } from "react";
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
@@ -24,6 +23,10 @@ const SchoolAdmin = () => {
     })
     const [formData, setFormData] = useState(formData_inital)
     const [isActive, setIsActive] = useState(true)
+    const [snackBarData, setSnackBarData] = useState({ open: false, msg: '' })
+    const closeSnackbar = () => {
+        setSnackBarData({ open: false, msg: '' })
+    }
     useEffect(() => {
         fetchSchoolDetails(isActive);
     }, [])
@@ -31,7 +34,7 @@ const SchoolAdmin = () => {
         setIsActive(is_active)
         setFetchStatus('loading')
         setSchoolDetails([])
-        axiosInstance.get(`http://127.0.0.1:4000/api/v1/schools?isActive=${is_active}`).then((response) => {
+        axiosInstance.get(`/api/v1/schools/adminIndex?isActive=${is_active}`).then((response) => {
             setSchoolDetails(response.data)
             setFetchStatus('success')
         }).catch(() => {
@@ -44,7 +47,7 @@ const SchoolAdmin = () => {
             ...dialogDetails,
             loader: true
         })
-        const url = dialogDetails.type == 'post' ? 'http://127.0.0.1:4000/api/v1/schools' : `http://127.0.0.1:4000/api/v1/schools/${formData.id}`
+        const url = dialogDetails.type == 'post' ? '/api/v1/schools' : `/api/v1/schools/${formData.id}`
         let data = dialogDetails.type == 'delete' ? undefined : { name: formData.name, address: formData.address }
         if (dialogDetails.type == 'disable') {
             data.is_active = false
@@ -52,11 +55,15 @@ const SchoolAdmin = () => {
         else if (dialogDetails.type == 'enable') {
             data.is_active = true
         }
-        axios({
+        axiosInstance({
             method: dialogDetails.type == 'disable' || dialogDetails.type == 'enable' ? 'put' : dialogDetails.type,
             url,
             data
         }).then((res) => {
+            if (dialogDetails.type == 'post') setSnackBarData({open: true, msg: 'Program Added Successfully'})
+            else if (dialogDetails.type == 'put') setSnackBarData({open: true, msg: 'Program Updated Successfully'})
+            else if (dialogDetails.type == 'enable') setSnackBarData({open: true, msg: 'Program Enabled Successfully'})
+            else if (dialogDetails.type == 'disable') setSnackBarData({open: true, msg: 'Program Disabled Successfully'})
             setDialogDetails({
                 ...dialogDetails,
                 loader: false,
@@ -65,6 +72,7 @@ const SchoolAdmin = () => {
             fetchSchoolDetails(isActive)
             setFormData({ name: '', address: '' })
         }).catch(() => {
+            setSnackBarData({open: true, msg: 'Some Error Ocurred'})
             setDialogDetails({
                 ...dialogDetails,
                 loader: false,
@@ -140,9 +148,9 @@ const SchoolAdmin = () => {
                                                 </> :
                                                     <>
                                                         <Button variant="outlined" onClick={() => { openDialog('enable', row) }}>Enable</Button>
-                                                        <IconButton onClick={() => { openDialog('delete', row, true) }} aria-label="delete">
+                                                        {/* <IconButton onClick={() => { openDialog('delete', row, true) }} aria-label="delete">
                                                             <DeleteOutlineOutlinedIcon />
-                                                        </IconButton>
+                                                        </IconButton> */}
                                                     </>
                                                 }
                                             </Stack>
@@ -161,6 +169,13 @@ const SchoolAdmin = () => {
     }
     return (
         <section className={lilita.variable}>
+            <Snackbar
+                open={snackBarData.open}
+                autoHideDuration={3000}
+                onClose={closeSnackbar}
+                message={snackBarData.msg}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            />
             <Dialog
                 // sx={{
                 //     "& .MuiDialog-container": {
