@@ -153,7 +153,7 @@ const AfterSchoolPage = () => {
               <form onSubmit={(e) => { addToCart(e, schedule.id) }}>
                 <div className='p-4'>
                   <div className='flex gap-4'>
-                    {schedule.image_url ? <CardMedia
+                    {schedule.program_image_url ? <CardMedia
                       sx={{ width: 220, height: 123.75, borderRadius: 26, backgroundColor: "var(--secondary-background)", backgroundPosition: 'center', backgroundSize: 'contain' }}
                       image={schedule.program_image_url}
                       title="green iguana"
