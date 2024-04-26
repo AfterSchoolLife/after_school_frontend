@@ -53,6 +53,15 @@ const SendEmailComponent = () => {
             setStudentDetails(scheduleInfo.data.map(d => d.user.email))
         })
     }
+    const sendEmail = (e) => {
+        e.preventDefault()
+        const post_body = {}
+        post_body['body'] = emailBody
+        post_body['emailids'] = ['shanephear.jc@gmail.com']
+        axiosInstance.post('/api/v1/schedules/sendEmail',{email:post_body}).then((response) => {
+            console.log(response.data)
+        }).catch(() => {})
+    }
     return <section className={lilita.variable}>
         <h2>Send Notification</h2>
         <div className="pt-4">
@@ -96,23 +105,28 @@ const SendEmailComponent = () => {
             <p>{emailIds.join(',')}</p>
         </div>
             <div className="p-4 pl-0">
-                <TextField
-                    required
-                    autoComplete="off"
-                    id="email-body-id"
-                    name="email-body"
-                    multiline
-                    rows={8}
-                    type="text"
-                    value={emailBody}
-                    fullWidth
-                />
-                <div className="text-end pt-4">
-                    <Button type="submit" variant="contained">Send Notification</Button>
-                </div>
-            </div></> : <></>}
+                <form onSubmit={sendEmail}>
+                    <TextField
+                        required
+                        onChange={(e) => {setEmailBody(e.target.value)}}
+                        autoComplete="off"
+                        id="email-body-id"
+                        name="email-body"
+                        multiline
+                        rows={8}
+                        type="text"
+                        value={emailBody}
+                        fullWidth
+                    />
+                    <div className="text-end pt-4">
+                        <Button type="submit" variant="contained">Send Notification</Button>
+                    </div>
+                </form>
+            </div>
+        </> : <></>
+        }
 
-    </section>
+    </section >
 }
 
 export default SendEmailComponent;

@@ -2,18 +2,26 @@
 
 import AddStudentComponent from "@components/addStudent"
 import axiosInstance from "@components/axiosInstance"
+import { UserContext } from "@components/root"
 import { Card, CardContent, LinearProgress } from "@mui/material"
-import { Fragment, useEffect, useState } from "react"
+import { Fragment, useContext, useEffect, useState } from "react"
 
 const StudentComponent = () => {
     const [studentData, setStudentData] = useState([])
     const [fetchingStatus, setFetchingStatus] = useState('loading')
+    const [userDetails, setUserDetails] = useContext(UserContext)
     useEffect(() => {
         fetchStudentDetails()
     }, [])
     const fetchStudentDetails = () => {
         axiosInstance.get("/api/v1/students?isActive=true").then((response) => {
             setStudentData(response.data)
+            setUserDetails((prevData) => {
+                return {
+                    ...prevData,
+                    student: response.data
+                }
+            })
             setFetchingStatus('success')
         })
     }
