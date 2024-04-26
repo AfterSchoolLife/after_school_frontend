@@ -465,3 +465,9 @@ button {
         width: calc(33.3% - 1rem);
     }
 }
+
+.payment-div {
+    border: 1px solid var(--primary-color-1);
+    border-radius: 26px;
+    margin-bottom: 1rem;
+}

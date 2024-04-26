@@ -1,20 +1,19 @@
 'use client'
 import axiosInstance from "@components/axiosInstance";
 import { lilita } from "@components/themeregistry";
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { Button, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 
 const SendEmailComponent = () => {
     const [disableSelect, setDisableSelect] = useState(true)
     const [scheduleDetails, setScheduleDetails] = useState([])
     const [schoolDetails, setSchoolDetails] = useState([])
-    const [productDetails, setProductDetails] = useState([])
-    const [fetchStatus, setFetchStatus] = useState('none')
+    const [emailBody, setEmailBody] = useState('')
     const [formData, SetFormData] = useState({
         school_id: '',
         schedule_id: '',
     })
-    const [studentDetails, setStudentDetails] = useState([])
+    const [emailIds, setStudentDetails] = useState([])
     useEffect(() => {
         fetchSelectDetails()
     }, [])
@@ -46,9 +45,13 @@ const SendEmailComponent = () => {
             }
         })
         if (type == 'schedule_id') {
-            // setFetchStatus('loading')
-            // fetchPurchaseHistory(type)
+            fetchPurchaseHistory()
         }
+    }
+    const fetchPurchaseHistory = () => {
+        axiosInstance.get(`/api/v1/purchaseds/getStudentInfoSchedule/${formData.schedule_id}`).then((scheduleInfo) => {
+            setStudentDetails(scheduleInfo.data.map(d => d.user.email))
+        })
     }
     return <section className={lilita.variable}>
         <h2>Send Notification</h2>
@@ -88,6 +91,27 @@ const SendEmailComponent = () => {
                 </Select>
             </FormControl>
         </div>
+        {emailIds.length ? <><div className="p-4">
+            <p className="text-3xl pb-4">Emails will be sent to</p>
+            <p>{emailIds.join(',')}</p>
+        </div>
+            <div className="p-4 pl-0">
+                <TextField
+                    required
+                    autoComplete="off"
+                    id="email-body-id"
+                    name="email-body"
+                    multiline
+                    rows={8}
+                    type="text"
+                    value={emailBody}
+                    fullWidth
+                />
+                <div className="text-end pt-4">
+                    <Button type="submit" variant="contained">Send Notification</Button>
+                </div>
+            </div></> : <></>}
+
     </section>
 }
 

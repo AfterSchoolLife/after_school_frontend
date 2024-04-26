@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-    baseURL: 'https://after-school-frontend.vercel.app',
+    baseURL: process.env.BACKEND_URL,
   });
 
 const getAuthToken = () => {

@@ -31,7 +31,7 @@ const PurchasesComponent = () => {
         fetchSelectDetails()
     }, [])
     const fetchSelectDetails = () => {
-        axiosInstance.get('/api/v1/schedules?isActive=true').then((response) => {
+        axiosInstance.get('/api/v1/schedules/adminIndex?isActive=true').then((response) => {
             setScheduleDetails(response.data)
             const schoolData = {}
             response.data.forEach((d) => {
