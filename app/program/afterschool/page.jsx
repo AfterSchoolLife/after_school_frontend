@@ -20,7 +20,7 @@ const week_days = [{ value: "Monday", display: 'M' }, { value: "Tuesday", displa
 const AfterSchoolPage = () => {
   const router = useRouter()
   const [school_id, setSchoolId] = useState(useSearchParams().get('id'))
-  const [scheduleData, setScheduleData] = useState({})
+  const [scheduleData, setScheduleData] = useState([])
   const [schoolDetail, setSchoolDetail] = useState(null)
   const [fetchingData, setFetchingData] = useState('loading')
   const [selectData, setSelectData] = useState([])
@@ -35,7 +35,7 @@ const AfterSchoolPage = () => {
     if (fetchId) {
       setSchoolId(fetchId)
     }
-    const url = userDetails.isLoggedin ? '/api/v1/schedules/indexprivate':'/api/v1/schedules'
+    const url = userDetails.isLoggedin ? '/api/v1/schedules/indexprivate' : '/api/v1/schedules'
     axiosInstance.get(`${url}?schoolId=${fetchId}`).then((response) => {
       const set_data = {}
       response.data.forEach(v => {
@@ -62,18 +62,31 @@ const AfterSchoolPage = () => {
       router.push('/auth/login')
     }
     else {
-      axiosInstance.post('/api/v1/carts', {
-        "schedule_id": id,
-        "student_id": studentSelectData[id]
-      }).then((response) => {
-        setUserDetails((prevData) => {
-          prevData.cart.data.push(response.data)
-          return {
-            ...prevData,
-          }
+      const sc = scheduleData.filter(schedule => schedule.id == id)
+      if (sc[0].currently_available == 0) {
+        axiosInstance.post('/api/v1/waitlists',{
+          "schedule_id": id,
+          student_id:studentSelectData[id]
+        }).then(() => {
+
+        }).catch((e) => {
+          console.log(e.response.data.errors[0])
         })
-      }).catch(() => {
-      })
+      }
+      else {
+        axiosInstance.post('/api/v1/carts', {
+          "schedule_id": id,
+          "student_id": studentSelectData[id]
+        }).then((response) => {
+          setUserDetails((prevData) => {
+            prevData.cart.data.push(response.data)
+            return {
+              ...prevData,
+            }
+          })
+        }).catch(() => {
+        })
+      }
     }
   }
   const formChange = (e, id) => {
@@ -162,7 +175,7 @@ const AfterSchoolPage = () => {
                         <p className='font-bold'>Available Slots: {schedule.currently_available}</p>
                         <div className='flex items-center gap-4'>
                           <p className='text-3xl text-color-primary-3'>${schedule.price}</p>
-                          <Button type='submit' variant='contained'>Add to Cart</Button>
+                          <Button type='submit' variant='contained'>{schedule.currently_available == 0 ? 'Add to Waitlist' : 'Add to Cart'}</Button>
                         </div>
                       </div>
                     </CardContent>
