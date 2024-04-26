@@ -158,7 +158,7 @@ const Shop = () => {
                                                 onChange={(e) => { selectChange(e, product.id) }}
                                             >
                                                 <MenuItem>
-                                                    <Link className='text-color-primary-1' href="/profile/">
+                                                    <Link className='text-color-primary-1' href="/profile/students">
                                                         Add Student...
                                                     </Link>
                                                 </MenuItem>

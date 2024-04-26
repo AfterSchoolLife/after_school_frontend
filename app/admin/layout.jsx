@@ -24,7 +24,7 @@ const AdminLayout = ({ children }) => {
         }
     }, [])
     return userDetails.isLoggedin && (userDetails.role == 'admin' || userDetails.role == 'super-admin') && <section className={lilita.variable}>
-        <h1 className="pl-4">Admin</h1>
+        <h1 className="pl-4">{userDetails.role == 'admin' ? 'Admin': 'Super Admin'}</h1>
         <div className="flex gap-4">
             <Drawer
                 sx={{
