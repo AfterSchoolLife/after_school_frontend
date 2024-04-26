@@ -34,7 +34,7 @@ const Login = () => {
     const closeSnackbar = () => {
         setSnackBarData({ open: false, msg: '' })
     }
-    return <section className={`${lilita.variable}`}>
+    return <section style={{minHeight: 'calc(100vh - 136px)'}} className={`${lilita.variable}`}>
 
         <Snackbar
             open={snackBarData.open}

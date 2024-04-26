@@ -3,7 +3,7 @@
 import axiosInstance from '@components/axiosInstance';
 import { UserContext } from '@components/root';
 import { lilita } from '@components/themeregistry';
-import { Card, CardContent, CardMedia, Divider, IconButton, CardActions, Select, Chip, MenuItem, FormControl, InputLabel, Button } from '@mui/material';
+import { Card, CardContent, CardMedia, Divider, IconButton, CardActions, Select, Chip, MenuItem, FormControl, InputLabel, Button, Snackbar } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import RemoveShoppingCartIcon from '@mui/icons-material/RemoveShoppingCart';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
@@ -26,6 +26,10 @@ const ShoppingCart = () => {
     const [studentData, setStudentData] = useState({})
     const [selectCountry, setCountry] = useState('')
     const [disableCheckout, setCheckout] = useState(false)
+    const [snackBarData, setSnackBarData] = useState({ open: false, msg: '' })
+    const closeSnackbar = () => {
+        setSnackBarData({ open: false, msg: '' })
+    }
 
     useEffect(() => {
         fetchCartSummary()
@@ -66,6 +70,7 @@ const ShoppingCart = () => {
     }
     const checkout = (e) => {
         e.preventDefault()
+        setCheckout(true)
         let post_body = []
         userDetails.cart.data.forEach(d => {
             if (d.cart_type == "cart_schedule") {
@@ -85,18 +90,27 @@ const ShoppingCart = () => {
                 })
             }
         })
-        axiosInstance.post('/api/v1/checkout',{ "purchase_items": post_body }).then(response => {
-            router.push(`/shop/checkout?country=${selectCountry}`)
+        axiosInstance.post('/api/v1/checkout', { "purchase_items": post_body }).then(response => {
+            setCheckout(false)
+            router.push('/shop/checkout')
         }).catch((error) => {
-            if (error.response.data.errors && error.response.data.errors.includes('Student combination must be unique')){
-                console.log('The student is already registered to the program')
+            setCheckout(false)
+            if (error.response.data.errors && error.response.data.errors.includes('Student combination must be unique')) {
+                setSnackBarData({open: true, msg: "Student already registered to the program"})
             }
             else if (error.response.data.errors && error.response.data.errors.includes('fully booked')) {
-                console.log('The program is fully booked')
+                setSnackBarData({open: true, msg: "The program is fully booked"})
             }
         })
     }
-    return <section>
+    return <section style={{minHeight: 'calc(100vh - 136px)'}}>
+        <Snackbar
+            open={snackBarData.open}
+            autoHideDuration={3000}
+            onClose={closeSnackbar}
+            message={snackBarData.msg}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        />
         {userDetails.cart.data.length ? <form onSubmit={checkout} className={`flex gap-8 pt-8 ${lilita.variable}`}>
             <div className="w-3/5">
                 <h2 className="text-center">Shopping Cart</h2>
@@ -186,7 +200,7 @@ const ShoppingCart = () => {
                 </div>
             </div>
             <div className="w-2/5">
-                <div className='sticky top-0'>
+                <div>
                     <h2 className="text-center">Summary</h2>
                     <div className='p-4'>
                         <h5 className='pb-2 invisible'>Products</h5>
@@ -196,7 +210,6 @@ const ShoppingCart = () => {
                             <div className='flex w-full justify-between pb-8 text-lg'><div>Subtotal ({`${productDetails['Products'].length}`} item)</div><div className='text-color-primary-1'>${cartSummary.product_sum}</div></div>
                             <div className='text-xl font-extrabold pb-1'>Program</div>
                             <div className='flex w-full justify-between pb-8 text-lg'><div>Subtotal ({`${productDetails['Programs'].length}`} item)</div><div className='text-color-primary-1'>${cartSummary.schedule_sum}</div></div>
-                            <div className='flex w-full justify-between pb-8 text-lg'><div>TAX</div><div className='text-color-primary-1'>$0.00</div></div>
                             <Divider />
                             <div className='font-extrabold flex w-full justify-between pt-8 text-xl'><div>Total</div><div className='text-color-primary-1'>${cartSummary.total}</div></div>
                         </div>

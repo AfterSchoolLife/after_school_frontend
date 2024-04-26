@@ -13,8 +13,8 @@ const ProgramComponent = () => {
                         <div className="flex items-center justify-between pb-4">
                             <p style={{ borderBottom: '3px solid' }} className="p-4 text-bold text-color-primary-1">After school program</p>
                             <Divider orientation="vertical" variant="middle" flexItem />
-                            <Link href="/program/summercamps">
-                                <p className="p-4">Summer Camp</p>
+                            <Link href="/program/holidaycamps">
+                                <p className="p-4">Holiday Camp</p>
                             </Link>
                         </div>
                         <h4 className="pb-4 text-center">Unlocking Adventure & Knowledge Beyond School Hours</h4>

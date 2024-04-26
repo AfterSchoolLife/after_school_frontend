@@ -1,6 +1,6 @@
 "use client"
 import { lilita } from '@components/themeregistry';
-import { Button, LinearProgress, FormControl, TextField, IconButton, Tooltip, InputLabel, Select, MenuItem } from '@mui/material';
+import { Button, LinearProgress, FormControl, TextField, IconButton, Tooltip, InputLabel, Select, MenuItem, Snackbar } from '@mui/material';
 import Link from "next/link";
 import SearchIcon from '@mui/icons-material/Search';
 import Card from '@mui/material/Card';
@@ -21,6 +21,10 @@ const Shop = () => {
     const [searchText, setSearchText] = useState('')
     const [disableProduct, setDisableProduct] = useState('')
     const [studentSelectData, setStudentSelectData] = useState({})
+    const [snackBarData, setSnackBarData] = useState({ open: false, msg: '' })
+    const closeSnackbar = () => {
+        setSnackBarData({ open: false, msg: '' })
+    }
     useEffect(() => {
         fetchProductDetails()
     }, [])
@@ -44,7 +48,7 @@ const Shop = () => {
     const searchProducts = (e) => {
         setFilteredDetails(productDetails.filter(prod => prod.title.toLowerCase().includes(searchText.toLowerCase()) || prod.description.toLowerCase().includes(searchText.toLowerCase())))
     }
-    const addToCart = (e,id) => {
+    const addToCart = (e, id) => {
         e.preventDefault()
         setDisableProduct(id)
         axiosInstance.post('/api/v1/carts', {
@@ -58,9 +62,15 @@ const Shop = () => {
                     ...prevData,
                 }
             })
-            console.log(response)
-        }).catch(() => {
+            setSnackBarData({ open: true, msg: "Added to Cart" })
+        }).catch((e) => {
             setDisableProduct('')
+            if (e.response.data.error && e.response.data.error == "Student combination must be unique") {
+                setSnackBarData({ open: true, msg: 'Product Already Present in Cart' })
+            }
+            else {
+                setSnackBarData({ open: true, msg: 'Error adding to Cart' })
+            }
         })
     }
     const selectChange = (e, id) => {
@@ -73,13 +83,20 @@ const Shop = () => {
 
     }
     return userDetails.isLoggedin && <section className={`flex gap-8 flex-col pb-8 ${lilita.variable}`}>
+        <Snackbar
+            open={snackBarData.open}
+            autoHideDuration={3000}
+            onClose={closeSnackbar}
+            message={snackBarData.msg}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        />
         <div>
             <div className='banner relative'>
                 <div className='banner-text z-10'>
                     <h2 className='pb-2'>Embark on a Learning Adventure!</h2>
                     <p className='text-xl'>Unlock the magic of knowledge with our interactive educational resources - where every play session opens a door to new discoveries</p>
                 </div>
-                <img className='opacity-65' alt='shop page banner' src="/shop-banner.jpeg"></img>
+                <img className='opacity-65' alt='shop page banner' src="/shop-banner.jpg"></img>
             </div>
             <div className='info-div paper-background text-color-primary-light mb-6'>
                 <FormControl
@@ -115,7 +132,7 @@ const Shop = () => {
                     {
                         filteredDetails.map((product) => {
                             return <Card key={product.id} className='card shopping-card' sx={{ width: 300 }}>
-                                <form onSubmit={(e) => { addToCart(e,product.id) }}>
+                                <form onSubmit={(e) => { addToCart(e, product.id) }}>
                                     <div>
                                         {product.image_url ? <CardMedia
                                             sx={{ height: 180, backgroundColor: "var(--secondary-background)", backgroundPosition: 'center', backgroundSize: 'contain' }}
@@ -131,7 +148,7 @@ const Shop = () => {
                                                     {product.description}
                                                 </p></Tooltip>
                                         </CardContent>
-                                        <FormControl sx={{ marginLeft: '8px',minWidth: 180, marginTop: '8px' }} required>
+                                        <FormControl sx={{ marginLeft: '8px', minWidth: 180, marginTop: '8px' }} required>
                                             <InputLabel id={String(product.id) + 'select'}>Select Student</InputLabel>
                                             <Select
                                                 id={String(product.id)}

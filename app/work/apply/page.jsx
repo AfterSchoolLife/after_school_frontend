@@ -1,7 +1,7 @@
 'use client'
 import axiosInstance from "@components/axiosInstance"
 import { lilita } from "@components/themeregistry"
-import { Button, Card, CardContent, InputLabel, TextField } from "@mui/material"
+import { Button, Card, CardContent, InputLabel, Snackbar, TextField } from "@mui/material"
 import { useState } from "react"
 
 const formData_inital = {
@@ -50,6 +50,10 @@ const formData_inital = {
 const ApplyComponent = () => {
     const [formData, setFormData] = useState(formData_inital)
     const [submitDisabled, setDisabled] = useState(false)
+    const [snackBarData, setSnackBarData] = useState({ open: false, msg: '' })
+    const closeSnackbar = () => {
+        setSnackBarData({ open: false, msg: '' })
+    }
     const formChange = (e) => {
         setFormData((prevFormData) => {
             prevFormData[e.target.id].value = e.target.value
@@ -66,9 +70,11 @@ const ApplyComponent = () => {
             data[key] = formData[key].value
         })
         axiosInstance.post('/api/v1/candidates',data).then(() => {
+            setSnackBarData({open: true, msg: 'Your Profile has been sent for review'})
             setDisabled(false)
             clearForm()
         }).catch(() => {
+            setSnackBarData({open: true, msg: 'Some Error occured creating your profile'})
             setDisabled(false)
         })
     }
@@ -83,6 +89,13 @@ const ApplyComponent = () => {
         })
     }
     return <section className={`${lilita.variable}`}>
+        <Snackbar
+            open={snackBarData.open}
+            autoHideDuration={3000}
+            onClose={closeSnackbar}
+            message={snackBarData.msg}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        />
         <Card className="card work-register-card">
             <CardContent>
                 <h2 className="pb-4">Candidate Profile</h2>

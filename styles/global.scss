@@ -415,7 +415,7 @@ button {
     z-index: 999999 !important;
 }
 
-.summer-camp-section {
+.holiday-camp-section {
     padding: 4rem;
     img {
         border-radius: 26px;
@@ -470,4 +470,9 @@ button {
     border: 1px solid var(--primary-color-1);
     border-radius: 26px;
     margin-bottom: 1rem;
+}
+
+.footer {
+    background-color: var(--primary-color-1);
+    color: var(--primary-text-color-light);
 }

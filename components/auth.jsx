@@ -5,6 +5,7 @@ import axiosInstance from "./axiosInstance"
 import { useRouter } from "next/navigation"
 import { UserContext } from "./root"
 import Navbar from "./Navbar"
+import Footer from "./Footer"
 
 const AuthComponent = ({ children }) => {
     const [userDetails, setUserDetails] = useContext(UserContext)
@@ -44,12 +45,14 @@ const AuthComponent = ({ children }) => {
 
 
 
-    return userInitialized ? <><Navbar />
+    return userInitialized ? <>
+    <Navbar />
         <main className='root'>
             <div className="app-container">
                 {children}
             </div>
         </main>
+    <Footer />
     </> : <></>
 }
 

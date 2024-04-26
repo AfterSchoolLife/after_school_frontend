@@ -4,7 +4,7 @@ import { Fragment, useContext, useEffect, useState } from 'react'
 import axios from 'axios'
 import { lilita } from '@components/themeregistry'
 import { fetchSchools } from '@components/commonAPI'
-import { Button, Card, CardContent, CardMedia, Chip, FormControl, IconButton, InputLabel, LinearProgress, MenuItem, Select } from '@mui/material'
+import { Button, Card, CardContent, CardMedia, Chip, FormControl, IconButton, InputLabel, LinearProgress, MenuItem, Select, Snackbar } from '@mui/material'
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import utc from 'dayjs/plugin/utc';
@@ -26,6 +26,10 @@ const AfterSchoolPage = () => {
   const [selectData, setSelectData] = useState([])
   const [studentSelectData, setStudentSelectData] = useState({})
   const [userDetails, setUserDetails] = useContext(UserContext)
+  const [snackBarData, setSnackBarData] = useState({ open: false, msg: '' })
+  const closeSnackbar = () => {
+    setSnackBarData({ open: false, msg: '' })
+  }
 
   useEffect(() => {
     fetchSchoolsData()
@@ -64,13 +68,19 @@ const AfterSchoolPage = () => {
     else {
       const sc = scheduleData.filter(schedule => schedule.id == id)
       if (sc[0].currently_available == 0) {
-        axiosInstance.post('/api/v1/waitlists',{
+        axiosInstance.post('/api/v1/waitlists', {
           "schedule_id": id,
-          student_id:studentSelectData[id]
+          student_id: studentSelectData[id]
         }).then(() => {
-
+          setSnackBarData({ open: true, msg: 'Added to Waitlist' })
         }).catch((e) => {
-          console.log(e.response.data.errors[0])
+          if (e.response.data.errors &&e.response.data.errors.length && 
+            e.response.data.errors[0] == "Schedule User is already on the waitlist for this schedule") {
+              setSnackBarData({ open: true, msg: "Student already present in waitlist" })
+          }
+          else {
+            setSnackBarData({ open: true, msg: e.response.data.errors[0] })
+          }
         })
       }
       else {
@@ -84,7 +94,14 @@ const AfterSchoolPage = () => {
               ...prevData,
             }
           })
-        }).catch(() => {
+          setSnackBarData({ open: true, msg: 'Added to Cart' })
+        }).catch((e) => {
+          if (e.response.data.error && e.response.data.error == "Student combination must be unique") {
+            setSnackBarData({ open: true, msg: 'Program Already Present in Cart' })
+          }
+          else {
+            setSnackBarData({ open: true, msg: 'Error adding to Cart' })
+          }
         })
       }
     }
@@ -103,6 +120,13 @@ const AfterSchoolPage = () => {
     }
   }
   return <section className={`p-12 ${lilita.variable}`}>
+    <Snackbar
+      open={snackBarData.open}
+      autoHideDuration={3000}
+      onClose={closeSnackbar}
+      message={snackBarData.msg}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+    />
     {
       fetchingData == 'loading' ? <div className="linearprogress"><LinearProgress variant="indeterminate" /></div> : <Fragment>
         <h1 className='pb-2 text-center'>{schoolDetail.name}</h1>
@@ -187,7 +211,6 @@ const AfterSchoolPage = () => {
         </div>
       </Fragment>
     }
-
 
   </section>
 }

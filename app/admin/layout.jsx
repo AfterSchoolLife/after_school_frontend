@@ -5,11 +5,15 @@ import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } fr
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useContext, useLayoutEffect } from "react";
-const sidenav = [{ label: 'Programs', href: '/admin/programs' }, 
-{ label: 'Schools', href: '/admin/schools' }, { label: 'Schedules', href: '/admin/schedules' }, 
-{ label: 'Products', href: '/admin/products' }, { label: 'Job Applications', href: '/admin/jobapplication' }, 
+const sidenav_super_admin = [{ label: 'Programs', href: '/admin/programs' },
+{ label: 'Schools', href: '/admin/schools' }, { label: 'Schedules', href: '/admin/schedules' },
+{ label: 'Products', href: '/admin/products' }, { label: 'Job Applications', href: '/admin/jobapplication' },
 { label: 'Purchase History', href: '/admin/purchases' }, { label: 'Create Admin', href: '/admin/create_admin' },
-{label: 'Send Notification', href: '/admin/send_email'}
+{ label: 'Send Notification', href: '/admin/send_email' }
+]
+const sidenav_admin = [{ label: 'Programs', href: '/admin/programs' },
+{ label: 'Schools', href: '/admin/schools' }, { label: 'Schedules', href: '/admin/schedules' },
+{ label: 'Products', href: '/admin/products' }
 ]
 const AdminLayout = ({ children }) => {
     const router = useRouter()
@@ -39,7 +43,15 @@ const AdminLayout = ({ children }) => {
                 anchor="left"
             >
                 <List>
-                    {sidenav.map((list_items, index) => (
+                    {userDetails.role == 'super-admin' ? sidenav_super_admin.map((list_items, index) => (
+                        <ListItem key={index} >
+                            <Link className="w-full" href={list_items.href}>
+                                <ListItemButton>
+                                    <ListItemText sx={{ color: 'var(--primary-color-1)' }} primary={<p className="font-semibold">{list_items.label}</p>} />
+                                </ListItemButton>
+                            </Link>
+                        </ListItem>
+                    )) : sidenav_admin.map((list_items, index) => (
                         <ListItem key={index} >
                             <Link className="w-full" href={list_items.href}>
                                 <ListItemButton>
