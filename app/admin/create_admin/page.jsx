@@ -11,6 +11,7 @@ const CreateAdminComponent = () => {
     const router = useRouter()
     const [creating, setcreating] = useState(false)
     const [snackBarData, setSnackBarData] = useState({ open: false, msg: '' })
+    const [userDetails, setUserDetails] = useContext(UserContext)
     const create_user = (e) => {
         e.preventDefault()
         setcreating(true)
@@ -18,7 +19,8 @@ const CreateAdminComponent = () => {
         axiosInstance.post('/api/v1/auth/createAdmin',{
             user: {
                 email: e.target['email'].value,
-                password: e.target['password'].value
+                password: e.target['password'].value,
+                country: userDetails.country
             }
         }).then((response) => {
             setcreating(false)
