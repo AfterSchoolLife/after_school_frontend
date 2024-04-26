@@ -155,7 +155,7 @@ const AfterSchoolPage = () => {
                   <div className='flex gap-4'>
                     {schedule.image_url ? <CardMedia
                       sx={{ width: 220, height: 123.75, borderRadius: 26, backgroundColor: "var(--secondary-background)", backgroundPosition: 'center', backgroundSize: 'contain' }}
-                      image={prod.product.image_url}
+                      image={schedule.program_image_url}
                       title="green iguana"
                     /> : <div style={{ borderRadius: 26, width: 220, height: 123.75, backgroundColor: "var(--secondary-background)" }}></div>}
 
