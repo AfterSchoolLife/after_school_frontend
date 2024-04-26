@@ -47,7 +47,6 @@ const ProductAdmin = () => {
         })
         const url = dialogDetails.type == 'post' ? '/api/v1/products' : `/api/v1/products/${formData.id}`
         let data = dialogDetails.type == 'delete' ? undefined : { title: formData.title, description: formData.description, price: formData.price, image_url: formData.image_url || ''  }
-        console.log(data)
         if (dialogDetails.type == 'disable') {
             data.is_active = false
         }

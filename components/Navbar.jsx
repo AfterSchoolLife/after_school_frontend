@@ -20,7 +20,6 @@ const Navbar = () => {
     };
     const logout = () => {
         localStorage.clear()
-        router.push('/')
         location.reload()
     }
     return (

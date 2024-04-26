@@ -18,6 +18,7 @@ dayjs.extend(timezone);
 
 const week_days = [{ value: "Monday", display: 'M' }, { value: "Tuesday", display: 'T' }, { value: "Wednesday", display: 'W' }, { value: 'Thursday', display: 'T' }, { value: 'Friday', display: 'F' }]
 const AfterSchoolPage = () => {
+  const router = useRouter()
   const [school_id, setSchoolId] = useState(useSearchParams().get('id'))
   const [scheduleData, setScheduleData] = useState({})
   const [schoolDetail, setSchoolDetail] = useState(null)
@@ -34,7 +35,8 @@ const AfterSchoolPage = () => {
     if (fetchId) {
       setSchoolId(fetchId)
     }
-    axiosInstance.get(`/api/v1/getSchedules?schoolId=${fetchId}`).then((response) => {
+    const url = userDetails.isLoggedin ? '/api/v1/schedules/indexprivate':'/api/v1/schedules'
+    axiosInstance.get(`${url}?schoolId=${fetchId}`).then((response) => {
       const set_data = {}
       response.data.forEach(v => {
         set_data[v.id] = ''
@@ -48,36 +50,44 @@ const AfterSchoolPage = () => {
     fetchSchools().then(response => {
       setSelectData(response.data)
       const school_data = response.data.filter(r => r.id == (id || school_id))
-      console.log(school_data)
       if (school_data.length) {
         setSchoolDetail(school_data[0])
         fetchSchedules(id)
       }
     })
   }
-  const addToCart = (e,id) => {
+  const addToCart = (e, id) => {
     e.preventDefault()
-    axiosInstance.post('/api/v1/carts', {
-      "schedule_id": id,
-      "student_id": studentSelectData[id]
-    }).then((response) => {
-      setUserDetails((prevData) => {
-        prevData.cart.data.push(response.data)
+    if (!userDetails.isLoggedin) {
+      router.push('/auth/login')
+    }
+    else {
+      axiosInstance.post('/api/v1/carts', {
+        "schedule_id": id,
+        "student_id": studentSelectData[id]
+      }).then((response) => {
+        setUserDetails((prevData) => {
+          prevData.cart.data.push(response.data)
+          return {
+            ...prevData,
+          }
+        })
+      }).catch(() => {
+      })
+    }
+  }
+  const formChange = (e, id) => {
+    if (e.target.value == 'add_student') {
+      router.push('/profile/students')
+    }
+    else {
+      setStudentSelectData((prevData) => {
+        prevData[id] = e.target.value
         return {
-          ...prevData,
+          ...prevData
         }
       })
-    }).catch(() => {
-    })
-  }
-  const formChange = (e,id) => {
-    setStudentSelectData((prevData) => {
-      prevData[id] = e.target.value
-      return {
-          ...prevData
-      }
-  })
-
+    }
   }
   return <section className={`p-12 ${lilita.variable}`}>
     {
@@ -103,7 +113,7 @@ const AfterSchoolPage = () => {
         <div style={{ maxWidth: '1100px', margin: 'auto' }} className='pt-8'>
           {scheduleData.length ? <>{scheduleData.map(schedule => {
             return <Card sx={{ width: '100%', marginLeft: 'auto', marginRight: 'auto' }} className="card mb-6" key={schedule.id}>
-              <form onSubmit={(e) => { addToCart(e,schedule.id) }}>
+              <form onSubmit={(e) => { addToCart(e, schedule.id) }}>
                 <div className='p-4'>
                   <div className='flex gap-4'>
                     {schedule.image_url ? <CardMedia
@@ -118,7 +128,7 @@ const AfterSchoolPage = () => {
                           <h4 className='pb-1'>{schedule.program_name}</h4>
                           <Chip className='program-chip' label={schedule.age_group} variant="outlined" />
                         </div>
-                        <FormControl sx={{ minWidth: 220 }} required>
+                        {userDetails.isLoggedin && <FormControl sx={{ minWidth: 220 }} required>
                           <InputLabel id={String(schedule.id) + 'select'}>Select Student</InputLabel>
                           <Select
                             id={String(schedule.id)}
@@ -127,10 +137,8 @@ const AfterSchoolPage = () => {
                             label="Select Student"
                             onChange={(e) => { formChange(e, schedule.id) }}
                           >
-                            <MenuItem>
-                            <Link className='text-color-primary-1' href="/profile/">
-                                Add Student...
-                              </Link>
+                            <MenuItem className='text-color-primary-1' value='add_student'>
+                              Add Student...
                             </MenuItem>
                             {
                               userDetails.student.map((student) => {
@@ -138,7 +146,7 @@ const AfterSchoolPage = () => {
                               })
                             }
                           </Select>
-                        </FormControl>
+                        </FormControl>}
                       </div>
                       <p>{schedule.program_description}</p>
                       <div className='flex items-center justify-between w-full pt-4'>

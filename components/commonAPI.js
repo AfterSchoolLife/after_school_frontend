@@ -7,7 +7,7 @@ export const fetchSchools = () => {
             resolve(school_response)
         }
         else {
-            let response = await axiosInstance.get('/api/v1/schools?isActive=true')
+            let response = await axiosInstance.get('/api/v1/schools')
             school_response.data = response.data
             resolve(response)
         }

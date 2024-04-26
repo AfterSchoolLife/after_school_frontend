@@ -4,7 +4,6 @@ import { useContext } from "react"
 
 const DetailsComponent = () => {
     const [userDetails, setUserDetails] = useContext(UserContext)
-    console.log(userDetails)
     return <section>
         <div style={{ width: '700px' }} className="m-auto">
             <h4 className="pb-4">Parent/Guardian Information</h4>

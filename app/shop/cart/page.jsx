@@ -11,7 +11,6 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import dayjs from 'dayjs'
-import AddStudentComponent from '@components/addStudent';
 import { useRouter } from 'next/navigation';
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -25,9 +24,10 @@ const ShoppingCart = () => {
     const [disableDelete, setDisableDelete] = useState('')
     const [cartSummary, setCartSummary] = useState({})
     const [studentData, setStudentData] = useState({})
+    const [selectCountry, setCountry] = useState('')
+    const [disableCheckout, setCheckout] = useState(false)
 
     useEffect(() => {
-        console.log(userDetails)
         fetchCartSummary()
         setProductDetails({
             'Programs': userDetails.cart.data.filter(c => c.cart_type == 'cart_schedule'),
@@ -49,7 +49,6 @@ const ShoppingCart = () => {
         setDisableDelete(id)
         axiosInstance.delete(`/api/v1/carts/${id}`).then(response => {
             fetchCartSummary()
-            console.log(response)
             setUserDetails((prevData) => {
                 prevData.cart.data = prevData.cart.data.filter(c => c.id != id)
                 return {
@@ -67,10 +66,38 @@ const ShoppingCart = () => {
     }
     const checkout = (e) => {
         e.preventDefault()
-        router.push('/shop/checkout')
+        let post_body = []
+        userDetails.cart.data.forEach(d => {
+            if (d.cart_type == "cart_schedule") {
+                post_body.push({
+                    "schedule_id": d.schedule_id,
+                    "student_id": d.student_id,
+                    "purchase_uuid": 'checkout_check',
+                    status: 'successful'
+                })
+            }
+            else if (d.cart_type == "cart_product") {
+                post_body.push({
+                    "product_id": d.product_id,
+                    "student_id": d.student_id,
+                    "purchase_uuid": 'checkout_check',
+                    status: 'successful'
+                })
+            }
+        })
+        axiosInstance.post('/api/v1/checkout',{ "purchase_items": post_body }).then(response => {
+            router.push(`/shop/checkout?country=${selectCountry}`)
+        }).catch((error) => {
+            if (error.response.data.errors && error.response.data.errors.includes('Student combination must be unique')){
+                console.log('The student is already registered to the program')
+            }
+            else if (error.response.data.errors && error.response.data.errors.includes('fully booked')) {
+                console.log('The program is fully booked')
+            }
+        })
     }
     return <section>
-        <form onSubmit={checkout} className={`flex gap-8 pt-8 ${lilita.variable}`}>
+        {userDetails.cart.data.length ? <form onSubmit={checkout} className={`flex gap-8 pt-8 ${lilita.variable}`}>
             <div className="w-3/5">
                 <h2 className="text-center">Shopping Cart</h2>
                 {
@@ -175,11 +202,11 @@ const ShoppingCart = () => {
                         </div>
                     </div>
                     <div className='px-6'>
-                        <Button sx={{ borderRadius: '26px' }} type='submit' color='primary3' className='w-full' variant='contained'><p className='text-xl'>Go to Checkout</p></Button>
+                        <Button disabled={disableCheckout} sx={{ borderRadius: '26px' }} type='submit' color='primary3' className='w-full' variant='contained'><p className='text-xl'>Go to Checkout</p></Button>
                     </div>
                 </div>
             </div>
-        </form>
+        </form> : <p className='text-center text-3xl pt-16'>Your Shopping Cart is Empty</p>}
     </section>
 }
 

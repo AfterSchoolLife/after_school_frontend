@@ -12,7 +12,6 @@ import Navbar from "@components/Navbar";
 import RootComponent from "@components/root";
 import AuthComponent from "@components/auth";
 const RootLayout = ({ children }) => {
-  console.log(children)
   return <html lang='en'>
     <head>
       <meta charSet="UTF-8"></meta>

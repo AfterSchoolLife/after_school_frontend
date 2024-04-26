@@ -1,5 +1,5 @@
 'use client'
-import { Stepper, Step, StepLabel, Card, CardContent, Button, TextField, InputLabel, FormControl, Snackbar, CircularProgress } from "@mui/material"
+import { Stepper, Step, StepLabel, Card, CardContent, Button, TextField, InputLabel, FormControl, Snackbar, CircularProgress, Select, MenuItem } from "@mui/material"
 import { useContext, useLayoutEffect, useState } from "react";
 import { lilita } from '@components/themeregistry';
 import { useRouter } from "next/navigation";
@@ -136,8 +136,8 @@ const Register = () => {
         setSnackBarData({ open: false, msg: '' })
     }
     const [activeStep, setActiveStep] = useState(0);
-    const [skipped, setSkipped] = useState(new Set());
     const [formData, setFormData] = useState(formData_inital)
+    const [selectCountry, setCountry] = useState('usa')
     const formChange = (e) => {
         setFormData((prevFormData) => {
             const append_Data = {}
@@ -181,6 +181,7 @@ const Register = () => {
                         post_data[key] = formData[step][key].value
                     })
                 })
+                post_data['country'] = selectCountry
                 axiosInstance.post('/api/v1/auth/signup', { user: post_data }).then(() => {
                     setCreating(false)
                     router.push('/auth/login')
@@ -219,6 +220,26 @@ const Register = () => {
                     </Stepper>
                     <div>
                         <form onSubmit={checkFormValidity} onChange={formChange}>
+                            <div className="flex justify-end">
+                                <FormControl sx={{ minWidth: 220, marginTop: 4 }} required>
+                                    <InputLabel id='select-country'>Select Country</InputLabel>
+                                    <Select
+                                        id='select-country-id'
+                                        value={selectCountry}
+                                        labelId='select-country'
+                                        label="Select Student"
+                                        required
+                                        onChange={(e) => { setCountry(e.target.value) }}
+                                    >
+                                        <MenuItem className='text-color-primary-1' value='usa'>
+                                            USA
+                                        </MenuItem>
+                                        <MenuItem className='text-color-primary-1' value='canada'>
+                                            CANADA
+                                        </MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </div>
                             <div className="auth-register-form">
                                 {Object.entries(formData[activeStep]).map((f_data) => {
                                     return (

@@ -76,14 +76,12 @@ const PurchasesComponent = () => {
     const fetchPurchaseHistory = (type) => {
         if (type == 'schedule_id') {
             axiosInstance.get(`/api/v1/purchaseds/getStudentInfoSchedule/${formData.schedule_id}`).then((scheduleInfo) => {
-                console.log(scheduleInfo)
                 setStudentDetails(scheduleInfo.data)
             })
             setFetchStatus('success')
         }
         else if (type == 'product_id') {
             axiosInstance.get(`/api/v1/purchaseds/getStudentInfoProduct/${formData.product_id}`).then((productInfo) => {
-                console.log(productInfo)
                 setStudentDetails(productInfo.data)
             })
             setFetchStatus('success')

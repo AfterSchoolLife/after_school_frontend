@@ -248,7 +248,6 @@ const ScheduleAdmin = () => {
     }
     const manageScheduleDetails = (e) => {
         e.preventDefault()
-        console.log(formData)
         setDialogDetails({
             ...dialogDetails,
             loader: true
@@ -303,7 +302,6 @@ const ScheduleAdmin = () => {
         })
     }
     const formChange = (e, id = null) => {
-        console.log(e)
         setFormData((prevFormData) => {
             if (id) {
                 prevFormData[id].value = e.target.value
@@ -330,7 +328,6 @@ const ScheduleAdmin = () => {
             type
         })
         if (type != 'post') {
-            console.log(data)
             setFormData((prevFormData) => {
                 Object.keys(formData).forEach(e => {
                     if (prevFormData[e].type) {

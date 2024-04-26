@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-    baseURL: 'https://after-school-backend.onrender.com',
+    baseURL: 'http://localhost:4000',
   });
 
 const getAuthToken = () => {

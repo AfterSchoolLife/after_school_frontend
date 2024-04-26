@@ -2,20 +2,24 @@
 import { TextField, Autocomplete, FormControl } from "@mui/material"
 import axios from 'axios'
 import Link from 'next/link'
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { fetchSchools } from "./commonAPI";
+import axiosInstance from "./axiosInstance";
+import { UserContext } from "./root";
 
 const SchoolAutoComplete = ({label}) => {
     const [disabelAutoComplete, setDisable] = useState(true)
     const [activeSchools, setActiveSchools] = useState([])
+    const [userDetails, setUserDetails] = useContext(UserContext)
     useEffect(() => {
         fetchSchoolnames()
     }, [])
     const fetchSchoolnames = () => {
-        fetchSchools().then(response => {
+        const url = userDetails.isLoggedin ? '/api/v1/schools/indexprivate':'/api/v1/schools'
+        axiosInstance.get(url).then(response => {
             setActiveSchools(response.data)
             setDisable(false)
-        })
+        }).catch(() =>{})
     }
     return <Autocomplete
         disabled={disabelAutoComplete}

@@ -61,7 +61,6 @@ const ApplyComponent = () => {
     const applyJob = (e) => {
         e.preventDefault()
         setDisabled(true)
-        console.log(formData)
         const data = {}
         Object.keys(formData).forEach(key => {
             data[key] = formData[key].value
