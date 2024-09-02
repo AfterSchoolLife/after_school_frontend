@@ -187,11 +187,26 @@ const AfterSchoolPage = () => {
                       </div>
                       <p>{schedule.program_description}</p>
                       <div className='flex items-center justify-between w-full pt-4'>
-                        <div className='flex gap-2'>
-                          {week_days.map(week => {
-                            return <div style={{ borderRadius: 8, border: `${schedule.days == week.value ? '3px solid var(--primary-color-1)' : '1px solid'}` }} className='program-week' key={week.value}>{week.display}</div>
-                          })}
-                        </div>
+                      <div className="flex gap-2">
+                        {console.log(schedule.days)}
+                        {week_days.map((week) => {
+                          // Check if the current week.value is included in the schedule.days array
+                          const isIncluded = Array.isArray(schedule.days) && schedule.days.includes(week.value);
+
+                          return (
+                            <div
+                              style={{
+                                borderRadius: 8,
+                                border: `${isIncluded ? '3px solid var(--primary-color-1)' : '1px solid'}`,
+                              }}
+                              className="program-week"
+                              key={week.value}
+                            >
+                              {week.display}
+                            </div>
+                          );
+                        })}
+                      </div>
                         <p className='text-color-primary-1'><CalendarTodayIcon fontSize='small' className='pr-1'></CalendarTodayIcon>{new Date(schedule.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - {new Date(schedule.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                         <p className='text-color-primary-1'><AccessTimeIcon fontSize='small' className='pr-1'></AccessTimeIcon>{dayjs.tz(schedule.start_time, 'UTC').format('h:mm A')} - {dayjs.tz(schedule.end_time, 'UTC').format('h:mm A')}</p>
                       </div>

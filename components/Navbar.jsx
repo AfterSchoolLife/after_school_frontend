@@ -43,11 +43,11 @@ const Navbar = () => {
                             Home
                         </Button>
                     </Link>
-                    <Link href="/program">
+                    {/* <Link href="/program">
                         <Button variant="contained" color="primary2">
                             Programs
                         </Button>
-                    </Link>
+                    </Link> */}
                     <Link href="/school">
                         <Button variant="contained" color="primary3">
                             Schools
