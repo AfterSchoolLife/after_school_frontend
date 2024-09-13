@@ -34,6 +34,46 @@ const AfterSchoolPage = () => {
   useEffect(() => {
     fetchSchoolsData()
   }, [])
+
+  // Helper function to add correct ordinal suffix (st, nd, rd, th)
+  const getOrdinalSuffix = (number) => {
+    const lastDigit = number % 10;
+    const lastTwoDigits = number % 100;
+
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 13) {
+      return `${number}th`; // Handle special cases for 11th, 12th, and 13th
+    }
+
+    switch (lastDigit) {
+      case 1:
+        return `${number}st`;
+      case 2:
+        return `${number}nd`;
+      case 3:
+        return `${number}rd`;
+      default:
+        return `${number}th`;
+    }
+  };
+
+  // Helper function to format age group
+  const formatAgeGroup = (ageGroup) => {
+    // Split the age group into an array
+    const ageRange = ageGroup.split('-');
+
+    // Check if the age group is in the expected format
+    if (ageRange.length === 2) {
+      const startGrade = getOrdinalSuffix(parseInt(ageRange[0], 10));
+      const endGrade = getOrdinalSuffix(parseInt(ageRange[1], 10));
+
+      // Return the formatted age group
+      return `Grade: ${startGrade}-${endGrade} grade`;
+    }
+
+    // Default to just returning the original age group if format is unexpected
+    return ageGroup;
+  };
+
   const fetchSchedules = (id = null) => {
     const fetchId = id ? id : school_id
     if (fetchId) {
@@ -163,7 +203,11 @@ const AfterSchoolPage = () => {
                       <div className='flex justify-between items-center pb-3'>
                         <div>
                           <h4 className='pb-1'>{schedule.program_name}</h4>
-                          <Chip className='program-chip' label={schedule.age_group} variant="outlined" />
+                          <Chip
+                            className='program-chip'
+                            label={formatAgeGroup(schedule.age_group)} // Format the age group here
+                            variant="outlined"
+                          />
                         </div>
                         {userDetails.isLoggedin && <FormControl sx={{ minWidth: 220 }} required>
                           <InputLabel id={String(schedule.id) + 'select'}>Select Student</InputLabel>

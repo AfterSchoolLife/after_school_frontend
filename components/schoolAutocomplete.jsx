@@ -15,7 +15,8 @@ const SchoolAutoComplete = ({label}) => {
         fetchSchoolnames()
     }, [])
     const fetchSchoolnames = () => {
-        const url = userDetails.isLoggedin ? '/api/v1/schools/indexprivate':'/api/v1/schools'
+        // const url = userDetails.isLoggedin ? '/api/v1/schools/indexprivate':'/api/v1/schools'
+        const url = '/api/v1/schools'
         axiosInstance.get(url).then(response => {
             setActiveSchools(response.data)
             setDisable(false)

@@ -13,21 +13,23 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import { forwardRef } from 'react';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';   
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';   
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import dayjs from 'dayjs';
-import   
- { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
 import axiosInstance from '@components/axiosInstance';
 import DescriptionIcon from '@mui/icons-material/Description';
 import ExcelJS from 'exceljs';
 import { IdealBankElement } from '@stripe/react-stripe-js';
+import MultiDatePicker from "react-multi-date-picker";
+
+
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -126,7 +128,7 @@ const formData_inital = {
     error: false
   },
   "cost_of_teacher": {
-    label: 'Cost of Teaching',
+    label: 'Teacher Cost',
     type: 'text',
     formType: 'number',
     value: '',
@@ -150,6 +152,12 @@ const formData_inital = {
     value: "",
     error: false
   },
+  "no_class_dates": {
+    label: "No Class Dates (Select Multiple)",  // Label for the field
+    type: "multidatepicker",  // Field type
+    value: [],  // Initial value (empty array)
+  }
+
 };
 
 const ScheduleAdmin = () => {
@@ -162,6 +170,14 @@ const ScheduleAdmin = () => {
   });
   const [formData, setFormData] = useState(formData_inital);
   const [isActive, setIsActive] = useState(true);
+
+  const today = new Date()
+  const tomorrow = new Date()
+
+  tomorrow.setDate(tomorrow.getDate() + 1)
+
+  const [values, setValues] = useState([today, tomorrow])
+
 
   useEffect(() => {
     fetchScheduleDetails(isActive);
@@ -194,7 +210,7 @@ const ScheduleAdmin = () => {
           const worksheet = workbook.getWorksheet(1);
           studentInfo.data.forEach((student, index) => {
             worksheet.addRow([index + 1, student.firstname,
-              student.lastname, student.grade, '', '', '', '', student.user.parent_1_phone_number, student.pickup, '']);
+            student.lastname, student.grade, '', '', '', '', student.user.parent_1_phone_number, student.pickup, '']);
           });
 
           let getSessions = countSessions(scheduleData.start_date, scheduleData.end_date, getDayInt[scheduleData.days]);
@@ -224,11 +240,9 @@ const ScheduleAdmin = () => {
           const blob = new Blob([modifiedData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 
           // Create a download link and trigger the download
-          const   
- link = document.createElement('a');
+          const link = document.createElement('a');
           link.href = URL.createObjectURL(blob);
-          link.download   
- = 'modified_sample.xlsx';
+          link.download = 'modified_sample.xlsx';
           link.click();
         })
         .catch((error) => {
@@ -291,7 +305,8 @@ const ScheduleAdmin = () => {
         "teacher_name": formData.teacher_name.value,
         "cost_of_teacher": formData.cost_of_teacher.value,
         "facility_rental": formData.facility_rental.value,
-        "total_available": formData.total_available.value
+        "total_available": formData.total_available.value,
+        "no_class_dates": formData.no_class_dates.value
       };
     }
 
@@ -324,37 +339,39 @@ const ScheduleAdmin = () => {
   };
 
   const formChange = (e, id = null) => {
-    
     setFormData((prevFormData) => {
-      if (id) {
 
-        // console.log("e")
-        // console.log(e)
-        // console.log("e.target")
-        // console.log(e.target)
-        // console.log("e.target.type")
-        // console.log()
 
-        prevFormData[id].value = e.target.value;
+      // Handle multiselect changes
+      if (Array.isArray(e.target.value)) {
+        prevFormData[e.target.id].value = e.target.value;
       } else {
-        // Handle multiselect change
-        if (Array.isArray(e.target.value) == true ) {
-            // console.log(e.target.value)
-            // console.log(prevFormData.days.value)
-            prevFormData.days.value = e.target.value
-            // console.log(Array.from(e.target.value).map(option => option.value))
-            // prevFormData[e.target.id].value = Array.from(e.target.value).map(option => option.value);
-          } else {
-            prevFormData[e.target.id].value = e.target.value;
-          }
+        prevFormData[e.target.id].value = e.target.value;
       }
-      console.log(prevFormData)
-      return {
+      
 
+      return {
         ...prevFormData,
       };
     });
   };
+
+  const noClassData = (e, id = null) => {
+    setFormData((prevFormData) => {
+
+
+      // Handle multiselect changes
+      console.log(e)
+      
+
+      return {
+        ...prevFormData,
+      };
+    });
+  };
+
+  
+
 
   const clearValues = () => {
     Object.keys(formData).forEach(key => {
@@ -396,14 +413,6 @@ const ScheduleAdmin = () => {
 
   const handleSwitchChange = () => {
     fetchScheduleDetails(!isActive);
-  };
-
-  const get_time = (time) => {
-    return dayjs.tz(newValue, 'UTC').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
-  };
-
-  const get_date = (date) => {
-    return;
   };
 
   const scheduleSection = (f) => {
@@ -449,7 +458,7 @@ const ScheduleAdmin = () => {
                             <IconButton onClick={() => { setupRoster(row) }}>
                               <DescriptionIcon />
                             </IconButton>
-                            </> :
+                          </> :
                             <>
                               <Button variant="outlined" onClick={() => { openDialog('enable', row) }}>Enable</Button>
                               {/* <IconButton onClick={() => { openDialog('delete', row, true) }} aria-label="delete">
@@ -493,7 +502,10 @@ const ScheduleAdmin = () => {
       >
         {dialogDetails.type === 'post' && <DialogTitle>Add School</DialogTitle>}
         {dialogDetails.type === 'put' && <DialogTitle>Edit School</DialogTitle>}
+
+
         <DialogContent>
+
           {dialogDetails.type === 'post' || dialogDetails.type === 'put' ? <div>
             <form onSubmit={manageScheduleDetails} className="schedule-form" onChange={formChange}>
               {
@@ -569,11 +581,24 @@ const ScheduleAdmin = () => {
                       >
                         {
                           formData[f].options.map((option) => {
-                            console.log(option)
+                            // console.log(option)
                             return <MenuItem key={option.value} value={option.value}>{option.option}</MenuItem>;
                           })
                         }
                       </Select>
+                    </FormControl>}
+
+                    {formData[f].type === 'multidatepicker' && <FormControl fullWidth>
+                      <InputLabel id={f + 'select'}>{formData[f].label}</InputLabel>
+                      <MultiDatePicker
+                        multiple
+                        id={f}
+                        value={Array.isArray(formData[f].value) ? formData[f].value : []}
+                        label={formData[f].label}
+                        labelId={f + 'select'}
+                        onChange={(e) => { noClassData(e, f) }}
+                        
+                      />
                     </FormControl>}
                   </div>
                 })
