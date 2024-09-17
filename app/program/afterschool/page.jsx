@@ -231,29 +231,42 @@ const AfterSchoolPage = () => {
                       </div>
                       <p>{schedule.program_description}</p>
                       <div className='flex items-center justify-between w-full pt-4'>
-                      <div className="flex gap-2">
-                        {console.log(schedule.days)}
-                        {week_days.map((week) => {
-                          // Check if the current week.value is included in the schedule.days array
-                          const isIncluded = Array.isArray(schedule.days) && schedule.days.includes(week.value);
+                        <div className="flex gap-2">
+                          {console.log(schedule.days)}
+                          {week_days.map((week) => {
+                            // Check if the current week.value is included in the schedule.days array
+                            const isIncluded = Array.isArray(schedule.days) && schedule.days.includes(week.value);
 
-                          return (
-                            <div
-                              style={{
-                                borderRadius: 8,
-                                border: `${isIncluded ? '3px solid var(--primary-color-1)' : '1px solid'}`,
-                              }}
-                              className="program-week"
-                              key={week.value}
-                            >
-                              {week.display}
-                            </div>
-                          );
-                        })}
-                      </div>
+                            return (
+                              <div
+                                style={{
+                                  borderRadius: 8,
+                                  border: `${isIncluded ? '3px solid var(--primary-color-1)' : '1px solid'}`,
+                                }}
+                                className="program-week"
+                                key={week.value}
+                              >
+                                {week.display}
+                              </div>
+                            );
+                          })}
+                          
+                        </div>
                         <p className='text-color-primary-1'><CalendarTodayIcon fontSize='small' className='pr-1'></CalendarTodayIcon>{new Date(schedule.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - {new Date(schedule.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                         <p className='text-color-primary-1'><AccessTimeIcon fontSize='small' className='pr-1'></AccessTimeIcon>{dayjs.tz(schedule.start_time, 'UTC').format('h:mm A')} - {dayjs.tz(schedule.end_time, 'UTC').format('h:mm A')}</p>
                       </div>
+                      {schedule.no_class_dates.length > 0 && ( // Check if no_class_dates array is not empty
+                        <div className="mt-3">
+                          <p className="font-bold">No classes will be held on:</p>
+                          <ul className="list-unstyled">
+                            {schedule.no_class_dates.map((date) => (
+                              <li key={date}>
+                                <span className="text-sm text-danger">{new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                       <div className='text-end pt-4 flex justify-between gap-4 items-center'>
                         <p className='font-bold'>Available Slots: {schedule.currently_available}</p>
                         <div className='flex items-center gap-4'>

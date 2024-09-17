@@ -55,8 +55,8 @@ const getDayInt = {
   'Friday': 5
 };
 
-const table_headings = ['Program', 'School', 'Days', 'Start Date', 'End Date', 'Start Time', 'End Time', 'Age Group', 'Price'];
-const table_value = ['program_name', 'school_name', 'days', 'start_date', 'end_date', 'start_time', 'end_time', 'age_group', 'price'];
+const table_headings = ['Program', 'School', 'Days', 'Start Date', 'End Date', 'Start Time', 'End Time', 'Age Group', 'Price', 'No Class Dates'];
+const table_value = ['program_name', 'school_name', 'days', 'start_date', 'end_date', 'start_time', 'end_time', 'age_group', 'price', 'no_class_dates'];
 
 const formData_inital = {
   "school_id": {
@@ -156,6 +156,7 @@ const formData_inital = {
     label: "No Class Dates (Select Multiple)",  // Label for the field
     type: "multidatepicker",  // Field type
     value: [],  // Initial value (empty array)
+    error: false
   }
 
 };
@@ -171,12 +172,6 @@ const ScheduleAdmin = () => {
   const [formData, setFormData] = useState(formData_inital);
   const [isActive, setIsActive] = useState(true);
 
-  const today = new Date()
-  const tomorrow = new Date()
-
-  tomorrow.setDate(tomorrow.getDate() + 1)
-
-  const [values, setValues] = useState([today, tomorrow])
 
 
   useEffect(() => {
@@ -273,6 +268,8 @@ const ScheduleAdmin = () => {
     setScheduleDetails([]);
     axiosInstance.get(`/api/v1/schedules/adminIndex?isActive=${is_active}`).then((response) => {
       setScheduleDetails(response.data);
+      console.log("response")
+      console.log(response.data)
       setFetchStatus('success');
     }).catch(() => {
       setFetchStatus('error');
@@ -338,16 +335,51 @@ const ScheduleAdmin = () => {
     });
   };
 
+  // function convertDatesToTimestamps(dates) {
+  //   return dates.map(date => date.getTime());
+  // }
+
   const formChange = (e, id = null) => {
+    
     setFormData((prevFormData) => {
 
 
-      // Handle multiselect changes
-      if (Array.isArray(e.target.value)) {
-        prevFormData[e.target.id].value = e.target.value;
+
+      
+      if (id) {
+
+        if (id == 'no_class_dates'){
+
+          const formattedDates = e.map(date => {
+            const year = String(date.year)
+            const month = String(date.monthIndex + 1).padStart(2, '0'); // Add leading zero for single-digit months
+            const day = String(date.day).padStart(2, '0'); // Add leading zero for single-digit days
+            const formattedDate = new Date(`${year}-${month}-${day}`);
+            return formattedDate;
+          });
+  
+          prevFormData[id].value = formattedDates;
+          // console.log(prevFormData)
+
+
+  
+        }
+        else{
+
+          prevFormData[id].value = e.target.value;
+        }
+
       } else {
-        prevFormData[e.target.id].value = e.target.value;
-      }
+
+
+        // Handle multiselect changes
+        if (Array.isArray(e.target.value)) {
+          
+          prevFormData[e.target.id].value = e.target.value;
+        } else {
+          prevFormData[e.target.id].value = e.target.value;
+        }
+      }  
       
 
       return {
@@ -355,21 +387,6 @@ const ScheduleAdmin = () => {
       };
     });
   };
-
-  const noClassData = (e, id = null) => {
-    setFormData((prevFormData) => {
-
-
-      // Handle multiselect changes
-      console.log(e)
-      
-
-      return {
-        ...prevFormData,
-      };
-    });
-  };
-
   
 
 
@@ -436,18 +453,46 @@ const ScheduleAdmin = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody sx={{ whiteSpace: 'nowrap' }}>
+                  
                   {scheduleDetails.map((row) => (
                     <TableRow
                       key={row.id}
                       sx={{ 'td,th': { borderBottom: '1px solid var(--primary-color-1)' }, '&:last-child td, &:last-child th': { border: 0 } }}
                     >
-                      {table_value.map(v => {
-                        return <TableCell key={v}>
-                          {(!v.endsWith('date') && !v.endsWith('time')) && <span>{formData[v]?.InputProps?.startAdornment && formData[v].InputProps.startAdornment}{row[v]}</span>}
-                          {v.endsWith('date') && <span>{new Date(row[v]).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>}
-                          {v.endsWith('time') && <span>{dayjs.tz(row[v], 'UTC').format('h:mm A')}</span>}
-                        </TableCell>;
-                      })}
+                        {table_value.map(v => {
+                          return <TableCell key={v}>
+                            {/* Display non-date, non-time values */}
+                            {(!v.includes('date') && !v.endsWith('time') && !v.endsWith('days')) && (
+                              <span>
+                                {formData[v]?.InputProps?.startAdornment && formData[v].InputProps.startAdornment}{row[v]}
+                              </span>
+                            )}
+
+                            {/* Display dates (single or array) */}
+                            
+                            {v.includes('date') && (
+        
+                              <span>
+                                {Array.isArray(row[v])
+                                  ? row[v].map((date, index) => (
+                                    <span key={index}>
+                                      {new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                      {index !== row[v].length - 1 && ', '}
+                                    </span>
+                                  ))
+                                  : new Date(row[v]).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                              </span>
+                            )}
+
+                            {/* Display time */}
+                            {v.endsWith('time') && <span>{dayjs.tz(row[v], 'UTC').format('h:mm A')}</span>}
+
+                            {/* Display comma-separated values for 'days' array */}
+                            {v === 'days' && Array.isArray(row[v]) && (
+                              <span>{row[v].join(', ')}</span>
+                            )}
+                          </TableCell>;
+                        })}
                       <TableCell>
                         <Stack className="justify-end" direction="row" spacing={1}>
                           {isActive ? <>
@@ -484,14 +529,6 @@ const ScheduleAdmin = () => {
   return (
     <section className={lilita.variable}>
       <Dialog
-        // sx={{
-        //     "& .MuiDialog-container": {
-        //         "& .MuiPaper-root": {
-        //             width: "100%",
-        //             maxWidth: "900px",  // Set your width here
-        //         },
-        //     },
-        // }}
         disableEscapeKeyDown
         fullWidth
         maxWidth='md'
@@ -544,6 +581,7 @@ const ScheduleAdmin = () => {
                       <DemoContainer components={['DatePicker']}>
                         <FormControl fullWidth>
                           <DatePicker
+                            
                             slotProps={{ textField: { required: true } }}
                             label={formData[f].label}
                             value={formData[f].value ? dayjs(formData[f].value) : null}
@@ -589,15 +627,19 @@ const ScheduleAdmin = () => {
                     </FormControl>}
 
                     {formData[f].type === 'multidatepicker' && <FormControl fullWidth>
-                      <InputLabel id={f + 'select'}>{formData[f].label}</InputLabel>
+                      <InputLabel 
+                        class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiFormLabel-filled Mui-required MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeMedium MuiInputLabel-outlined css-184e46h-MuiFormLabel-root-MuiInputLabel-root"
+                        id={f + 'select'}>{formData[f].label}
+                        </InputLabel>
                       <MultiDatePicker
                         multiple
                         id={f}
                         value={Array.isArray(formData[f].value) ? formData[f].value : []}
                         label={formData[f].label}
                         labelId={f + 'select'}
-                        onChange={(e) => { noClassData(e, f) }}
-                        
+                        onChange={(e) => { formChange(e, f) }}
+                        inputClass="MuiInputBase-input MuiOutlinedInput-input css-1t8l2tu-MuiInputBase-input-MuiOutlinedInput-input"
+                          
                       />
                     </FormControl>}
                   </div>
