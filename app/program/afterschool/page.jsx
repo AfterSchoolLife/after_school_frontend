@@ -199,6 +199,8 @@ const AfterSchoolPage = () => {
                       title="green iguana"
                     /> : <div style={{ borderRadius: 26, width: 220, height: 123.75, backgroundColor: "var(--secondary-background)" }}></div>}
 
+                    {console.log(schedule)}
+
                     <CardContent sx={{ width: 'calc(100% - 220px - 1rem)' }} className='program-card'>
                       <div className='flex justify-between items-center pb-3'>
                         <div>
@@ -232,7 +234,7 @@ const AfterSchoolPage = () => {
                       <p>{schedule.program_description}</p>
                       <div className='flex items-center justify-between w-full pt-4'>
                         <div className="flex gap-2">
-                          {console.log(schedule.days)}
+                          {/* {console.log(schedule.days)} */}
                           {week_days.map((week) => {
                             // Check if the current week.value is included in the schedule.days array
                             const isIncluded = Array.isArray(schedule.days) && schedule.days.includes(week.value);

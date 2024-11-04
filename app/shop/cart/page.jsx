@@ -120,6 +120,7 @@ const ShoppingCart = () => {
                         <Divider />
                         <div className='p-4 pt-8'>
                             {productDetails['Programs'].map((pr, index) => {
+                                console.log(productDetails)
                                 return <Card key={index} className='mb-4 card'>
                                     <div className='p-4'>
                                         <div className='flex gap-4'>
