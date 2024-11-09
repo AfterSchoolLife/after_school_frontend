@@ -256,6 +256,34 @@ button {
     align-items: center;
 }
 
+
+  
+  .info-div h3 {
+    font-size: 1.25rem; /* Default size for smaller screens */
+    margin: 0;
+  }
+  
+  @media (min-width: 600px) {
+    .info-div {
+      padding: 1.5rem;
+
+    }
+    .info-div h3 {
+      font-size: 1.5rem; /* Medium font size for tablets */
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .info-div {
+      padding: 2rem;
+
+    }
+    .info-div h3 {
+      font-size: 2rem; /* Larger font size for desktops */
+    }
+  }
+
+  
 //Home page
 
 .banner {
@@ -268,21 +296,37 @@ button {
 
 .banner-2 {
     position: relative;
-
+    display: flex;
+    flex-direction: column; // Stack elements vertically by default for smaller screens
+    
     img {
-        height: 470px;
-        width: 75%;
+        width: 100%; // Full width for smaller screens
+        height: auto; // Adjust height to maintain aspect ratio
         object-fit: cover;
+
+        @media (min-width: 1024px) { // Original layout on larger screens
+            width: 75%; // Match the original 75% width
+            height: 470px; // Fixed height for original layout
+        }
     }
 
     .banner2-description {
-        height: 100%;
-        position: absolute;
-        top: 0;
-        width: 30%;
-        right: 0;
+        width: 100%; // Full width on smaller screens
+        padding: 1rem; // Padding for text readability on smaller screens
+        position: relative;
+
+        @media (min-width: 1024px) { // Original layout for larger screens
+            width: 30%; // Match the original 30% width
+            position: absolute;
+            top: 0;
+            right: 0;
+            height: 100%; // Align with image height
+            padding: 2rem; // Padding for spaciousness on larger screens
+        }
     }
 }
+
+
 
 .program-img {
     height: 400px;
@@ -487,3 +531,5 @@ button {
     border-radius: 5px;
     background-color: #f5f5f5;
   }
+
+

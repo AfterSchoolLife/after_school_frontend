@@ -10,9 +10,11 @@ const StudentComponent = () => {
     const [studentData, setStudentData] = useState([])
     const [fetchingStatus, setFetchingStatus] = useState('loading')
     const [userDetails, setUserDetails] = useContext(UserContext)
+
     useEffect(() => {
         fetchStudentDetails()
     }, [])
+
     const fetchStudentDetails = () => {
         axiosInstance.get("/api/v1/students?isActive=true").then((response) => {
             setStudentData(response.data)
@@ -25,36 +27,47 @@ const StudentComponent = () => {
             setFetchingStatus('success')
         })
     }
-    return <section>
-        <div className="flex w-full justify-between p-4">
-            <h3>Student Information</h3>
-            <AddStudentComponent handleOutput={fetchStudentDetails}></AddStudentComponent>
-        </div>
-        {fetchingStatus == 'loading' && <div className="linearprogress"><LinearProgress variant="indeterminate" /></div>}
-        {fetchingStatus == 'success' && <div className="pt-4">
-            {studentData.length == 0 ? <p className="text-center text-xl">No records found</p> :
-                <div className="flex flex-wrap">
-                    {
-                        studentData.map(s => {
-                            return <div key={s.id} className="w-1/3">
-                                <Card className="card mr-6 mt-6">
-                                    <CardContent>
-                                        <div className="pb-2 flex">
-                                            <h5>{s.firstname} {s.lastname}</h5>
-                                        </div>
-                                        <p><span className="font-bold">Age: </span>{s.age}</p>
-                                        <p><span className="font-bold">Grade: </span>{s.grade}</p>
-                                        <p><span className="font-bold">Pickup: </span>{s.pickup}</p>
-                                        <p><span className="font-bold">Address: </span>{s.address}, {s.city}, {s.state}, {s.zip}</p>
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        })
-                    }
+
+    return (
+        <section className="p-4">
+            <div className="flex flex-wrap w-full justify-between p-4">
+                <h3 className="text-xl md:text-2xl font-semibold">Student Information</h3>
+                <AddStudentComponent handleOutput={fetchStudentDetails} />
+            </div>
+            {fetchingStatus === 'loading' && (
+                <div className="linearprogress">
+                    <LinearProgress variant="indeterminate" />
                 </div>
-            }
-        </div>}
-    </section>
+            )}
+            {fetchingStatus === 'success' && (
+                <div className="pt-4">
+                    {studentData.length === 0 ? (
+                        <p className="text-center text-xl">No records found</p>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                            {studentData.map((s) => {
+                                return (
+                                    <div key={s.id} className="w-full">
+                                        <Card className="card mx-auto mb-6 p-4 w-full">
+                                            <CardContent>
+                                                <div className="pb-2 flex">
+                                                    <h5 className="text-lg sm:text-xl font-bold">{s.firstname} {s.lastname}</h5>
+                                                </div>
+                                                <p><span className="font-bold">Age: </span>{s.age}</p>
+                                                <p><span className="font-bold">Grade: </span>{s.grade}</p>
+                                                <p><span className="font-bold">Pickup: </span>{s.pickup}</p>
+                                                <p><span className="font-bold">Address: </span>{s.address}, {s.city}, {s.state}, {s.zip}</p>
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    )}
+                </div>
+            )}
+        </section>
+    )
 }
 
-export default StudentComponent
+export default StudentComponent;

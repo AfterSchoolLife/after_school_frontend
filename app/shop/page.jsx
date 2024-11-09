@@ -101,29 +101,39 @@ const Shop = () => {
             <div className='info-div paper-background text-color-primary-light mb-6'>
                 <FormControl
                     sx={{
-                        "& .MuiInputBase-root": {
-                            padding: "0px"
-                        }
+                    width: { xs: '100%', sm: '75%', md: '60%', lg: '50%' }, // Adjust width based on screen size
+                    "& .MuiInputBase-root": {
+                        padding: "0px"
+                    }
                     }}
-                    className="w-5/12">
+                >
                     <TextField
-                        className='p-0 shop-input'
-                        id="schools"
-                        value={searchText}
-                        onChange={formChange}
-                        label={<p className='text-xl'>Search for Products</p>}
-                        name="schools"
-                        fullWidth
-                        InputProps={{
-                            endAdornment: (
-                                <IconButton onClick={searchProducts} sx={{ borderRadius: "0px !important", borderLeft: "1px solid", background: 'var(--primary-background)' }} color='primary'>
-                                    <SearchIcon fontSize="large" />
-                                </IconButton>
-                            ),
-                        }}
+                    className='p-0 shop-input'
+                    id="schools"
+                    value={searchText}
+                    onChange={formChange}
+                    label={<p className='text-xl'>Search for Products</p>}
+                    name="schools"
+                    fullWidth
+                    InputProps={{
+                        endAdornment: (
+                        <IconButton
+                            onClick={searchProducts}
+                            sx={{
+                            borderRadius: "0px !important",
+                            borderLeft: "1px solid",
+                            background: 'var(--primary-background)'
+                            }}
+                            color='primary'
+                        >
+                            <SearchIcon fontSize="large" />
+                        </IconButton>
+                        ),
+                    }}
                     />
                 </FormControl>
             </div>
+
             {
                 fetchStatus == 'loading' && <div className="linearprogress"><LinearProgress variant="indeterminate" /></div>
             }

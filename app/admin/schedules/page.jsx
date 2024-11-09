@@ -6,8 +6,8 @@ import {
   TableCell, TableContainer, TableHead, TableRow,
   LinearProgress, Slide, Dialog, DialogContent, Stack,
   DialogTitle, IconButton, CircularProgress,
-  FormControlLabel, Switch, InputLabel, Select, MenuItem,
-  Checkbox, FormGroup
+  FormControlLabel, Switch, InputLabel, Select, MenuItem, useTheme,
+  Checkbox, FormGroup, useMediaQuery
 } from '@mui/material';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -31,8 +31,12 @@ import MultiDatePicker from "react-multi-date-picker";
 
 
 
+
+
 dayjs.extend(utc);
 dayjs.extend(timezone);
+
+
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -162,6 +166,10 @@ const formData_inital = {
 };
 
 const ScheduleAdmin = () => {
+
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'))
+
   const [scheduleDetails, setScheduleDetails] = useState([]);
   const [fetchStatus, setFetchStatus] = useState('loading');
   const [dialogDetails, setDialogDetails] = useState({
@@ -440,7 +448,12 @@ const ScheduleAdmin = () => {
         return <p className="text-center">Error occured while fetching data</p>;
       case 'success':
         if (scheduleDetails.length > 0) {
-          return <div style={{ maxWidth: 'calc(100vw - 240px - 2rem)' }}>
+        return <div 
+                className={isSmallScreen ? 
+                    "MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation3 MuiTableContainer-root css-1eze76w-MuiPaper-root-MuiTableContainer-root" 
+                    : "w-full pl-4"}
+                style={isSmallScreen ? {} : { maxWidth: 'calc(100vw - 240px - 2rem)' }}
+            >
             <TableContainer sx={{ width: '95%' }} elevation={3} component={Paper}>
               <Table sx={{ width: '95%', minWidth: 650, background: 'var(--app-secondary)' }} aria-label="a dense table">
                 <TableHead sx={{ whiteSpace: 'nowrap' }}>
