@@ -13,7 +13,8 @@ const formData_inital = {
     title: '',
     description: '',
     image_url: '',
-    price: ''
+    price: '',
+    image: null
 }
 const ProductAdmin = () => {
     const [productDetails, setProductDetails] = useState([])
@@ -40,52 +41,72 @@ const ProductAdmin = () => {
         })
     }
     const manageProductDetails = (e) => {
-        e.preventDefault()
+        e.preventDefault();
         setDialogDetails({
             ...dialogDetails,
-            loader: true
-        })
-        const url = dialogDetails.type == 'post' ? '/api/v1/products' : `/api/v1/products/${formData.id}`
-        let data = dialogDetails.type == 'delete' ? undefined : { title: formData.title, description: formData.description, price: formData.price, image_url: formData.image_url || ''  }
-        if (dialogDetails.type == 'disable') {
-            data.is_active = false
+            loader: true,
+        });
+    
+        const url = dialogDetails.type === 'post' ? '/api/v1/products' : `/api/v1/products/${formData.id}`;
+        const formDataToSend = new FormData();
+    
+        formDataToSend.append('title', formData.title);
+        formDataToSend.append('description', formData.description);
+        formDataToSend.append('price', formData.price);
+    
+        if (formData.image_url) {
+            formDataToSend.append('image_url', formData.image_url);
         }
-        else if (dialogDetails.type == 'enable') {
-            data.is_active = true
+        if (formData.image) {
+            formDataToSend.append('image', formData.image);
         }
+    
+        // Set `is_active` based on dialog type
+        if (dialogDetails.type === 'disable') {
+            formDataToSend.append('is_active', false);
+        } else if (dialogDetails.type === 'enable') {
+            formDataToSend.append('is_active', true);
+        }
+    
         axiosInstance({
-            method: (dialogDetails.type == 'disable') || (dialogDetails.type == 'enable') ? 'put' : dialogDetails.type,
+            method: dialogDetails.type === 'disable' || dialogDetails.type === 'enable' ? 'put' : dialogDetails.type,
             url,
-            data
-        }).then((res) => {
-            setDialogDetails({
-                ...dialogDetails,
-                loader: false,
-                open: false
-            })
-            fetchProductDetails(isActive)
-            clearForm()
-        }).catch(() => {
-            setDialogDetails({
-                ...dialogDetails,
-                loader: false,
-                open: false
-            })
-            clearForm()
+            data: formDataToSend,
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
         })
-    }
+        .then((res) => {
+            setDialogDetails({
+                ...dialogDetails,
+                loader: false,
+                open: false,
+            });
+            fetchProductDetails(isActive);
+            clearForm();
+        })
+        .catch(() => {
+            setDialogDetails({
+                ...dialogDetails,
+                loader: false,
+                open: false,
+            });
+            clearForm();
+        });
+    };
+    
     const clearForm = () => {
-        setFormData({ title: '', description: '', image_url: '', price: '' })
-    }
+        setFormData({ title: '', description: '', image_url: '', price: '', image: null });
+    };
+    
     const formChange = (e) => {
-        setFormData((prevFormData) => {
-            prevFormData[e.target.id] = e.target.value
-            return {
-                ...prevFormData,
-            }
-        })
-    }
-    const openDialog = (type, data, status = false) => {
+        const { id, value, files } = e.target;
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            [id]: files ? files[0] : value, // Handles file input for `image`
+        }));
+    };
+        const openDialog = (type, data, status = false) => {
         setDialogDetails({
             ...dialogDetails,
             open: true,
@@ -114,50 +135,64 @@ const ProductAdmin = () => {
                 return <p className="text-center">Error occured while fetching data</p>
             case 'success':
                 if (productDetails.length > 0) {
-                    return <TableContainer elevation={3} component={Paper}>
-                        <Table sx={{ minWidth: 650, background: 'var(--app-secondary)' }} aria-label="a dense table">
-                            <TableHead>
-                                <TableRow
-                                    sx={{ 'td,th': { borderBottom: '1px solid var(--primary-color-1)' } }}>
-                                    <TableCell><p>Title</p></TableCell>
-                                    <TableCell><p>Description</p></TableCell>
-                                    <TableCell><p>Price</p></TableCell>
-                                    <TableCell><p className="text-end pr-4">Actions</p></TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {productDetails.map((row) => (
-                                    <TableRow
-                                        key={row.id}
-                                        sx={{ 'td,th': { borderBottom: '1px solid var(--primary-color-1)' }, '&:last-child td, &:last-child th': { border: 0 } }}
-                                    >
-                                        <TableCell className="min-w-4" component="th" scope="row">
-                                            {row.title}
-                                        </TableCell>
-                                        <TableCell>{row.description}</TableCell>
-                                        <TableCell>$ {row.price}</TableCell>
-                                        <TableCell>
-                                            <Stack className="justify-end" direction="row" spacing={1}>
-                                                {isActive ? <>
-                                                    <Button variant="outlined" onClick={() => { openDialog('disable', row) }}>Disable</Button>
-                                                    <IconButton onClick={() => { openDialog('put', row) }} aria-label="edit">
-                                                        <EditOutlinedIcon />
-                                                    </IconButton>
-                                                </> :
-                                                    <>
-                                                        <Button variant="outlined" onClick={() => { openDialog('enable', row) }}>Enable</Button>
-                                                        <IconButton onClick={() => { openDialog('delete', row, true) }} aria-label="delete">
-                                                            <DeleteOutlineOutlinedIcon />
-                                                        </IconButton>
-                                                    </>
-                                                }
-                                            </Stack>
-                                        </TableCell>
+                    return (
+                        <TableContainer elevation={3} component={Paper}>
+                            <Table sx={{ minWidth: 650, background: 'var(--app-secondary)' }} aria-label="a dense table">
+                                <TableHead>
+                                    <TableRow sx={{ 'td,th': { borderBottom: '1px solid var(--primary-color-1)' } }}>
+                                        <TableCell><p>Title</p></TableCell>
+                                        <TableCell><p>Description</p></TableCell>
+                                        <TableCell><p>Image</p></TableCell> {/* New column for Image */}
+                                        <TableCell><p>Price</p></TableCell>
+                                        <TableCell><p className="text-end pr-4">Actions</p></TableCell>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                                </TableHead>
+                                <TableBody>
+                                    {productDetails.map((row) => (
+                                        <TableRow
+                                            key={row.id}
+                                            sx={{ 'td,th': { borderBottom: '1px solid var(--primary-color-1)' }, '&:last-child td, &:last-child th': { border: 0 } }}
+                                        >
+                                            <TableCell className="min-w-4" component="th" scope="row">
+                                                {row.title}
+                                            </TableCell>
+                                            <TableCell>{row.description}</TableCell>
+                                            <TableCell>
+                                                {/* Conditional Image Rendering */}
+                                                {row.image ? (
+                                                    <img src={row.image} alt={row.title} width="50" height="50" />
+                                                ) : row.image_url ? (
+                                                    <img src={row.image_url} alt={row.title} width="50" height="50" />
+                                                ) : (
+                                                    <span>No Image</span>
+                                                )}
+                                            </TableCell>
+                                            <TableCell>$ {row.price}</TableCell>
+                                            <TableCell>
+                                                <Stack className="justify-end" direction="row" spacing={1}>
+                                                    {isActive ? (
+                                                        <>
+                                                            <Button variant="outlined" onClick={() => { openDialog('disable', row) }}>Disable</Button>
+                                                            <IconButton onClick={() => { openDialog('put', row) }} aria-label="edit">
+                                                                <EditOutlinedIcon />
+                                                            </IconButton>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Button variant="outlined" onClick={() => { openDialog('enable', row) }}>Enable</Button>
+                                                            <IconButton onClick={() => { openDialog('delete', row, true) }} aria-label="delete">
+                                                                <DeleteOutlineOutlinedIcon />
+                                                            </IconButton>
+                                                        </>
+                                                    )}
+                                                </Stack>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    );                    
                 }
                 else {
                     return <p className="text-center">No record found</p>
@@ -196,8 +231,15 @@ const ProductAdmin = () => {
                                 <TextField id='description' value={formData.description} autoComplete="off" rows={4} multiline label="Description" required variant="outlined" />
                             </FormControl>
                             <div className="flex gap-4 w-full">
-                                <FormControl className="w-2/3">
-                                    <TextField id='image_url' value={formData.image_url} autoComplete="off" label="Image Url" variant="outlined" />
+                                <FormControl className="w-full">
+                                    <TextField
+                                        id="image"
+                                        type="file"
+                                        onChange={(e) => setFormData({ ...formData, image: e.target.files[0] })}
+                                        autoComplete="off"
+                                        label="Upload Image"
+                                        variant="outlined"
+                                    />
                                 </FormControl>
                                 <FormControl className="w-1/3">
                                     <TextField inputProps={{ step: 0.01 }}

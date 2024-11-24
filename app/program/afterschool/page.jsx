@@ -34,6 +34,46 @@ const AfterSchoolPage = () => {
   useEffect(() => {
     fetchSchoolsData()
   }, [])
+
+  // Helper function to add correct ordinal suffix (st, nd, rd, th)
+  const getOrdinalSuffix = (number) => {
+    const lastDigit = number % 10;
+    const lastTwoDigits = number % 100;
+
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 13) {
+      return `${number}th`; // Handle special cases for 11th, 12th, and 13th
+    }
+
+    switch (lastDigit) {
+      case 1:
+        return `${number}st`;
+      case 2:
+        return `${number}nd`;
+      case 3:
+        return `${number}rd`;
+      default:
+        return `${number}th`;
+    }
+  };
+
+  // Helper function to format age group
+  const formatAgeGroup = (ageGroup) => {
+    // Split the age group into an array
+    const ageRange = ageGroup.split('-');
+
+    // Check if the age group is in the expected format
+    if (ageRange.length === 2) {
+      const startGrade = getOrdinalSuffix(parseInt(ageRange[0], 10));
+      const endGrade = getOrdinalSuffix(parseInt(ageRange[1], 10));
+
+      // Return the formatted age group
+      return `Grade: ${startGrade}-${endGrade} grade`;
+    }
+
+    // Default to just returning the original age group if format is unexpected
+    return ageGroup;
+  };
+
   const fetchSchedules = (id = null) => {
     const fetchId = id ? id : school_id
     if (fetchId) {
@@ -149,64 +189,152 @@ const AfterSchoolPage = () => {
         </FormControl>
         <div style={{ maxWidth: '1100px', margin: 'auto' }} className='pt-8'>
           {scheduleData.length ? <>{scheduleData.map(schedule => {
-            return <Card sx={{ width: '100%', marginLeft: 'auto', marginRight: 'auto' }} className="card mb-6" key={schedule.id}>
-              <form onSubmit={(e) => { addToCart(e, schedule.id) }}>
-                <div className='p-4'>
-                  <div className='flex gap-4'>
-                    {schedule.program_image_url ? <CardMedia
-                      sx={{ width: 220, height: 123.75, borderRadius: 26, backgroundColor: "var(--secondary-background)", backgroundPosition: 'center', backgroundSize: 'contain' }}
+            return <Card
+            sx={{
+              width: { xs: '100%', sm: '90%', md: '80%' },
+              margin: 'auto',
+              mb: 6,
+            }}
+            className="card"
+            key={schedule.id}
+          >
+            <form onSubmit={(e) => addToCart(e, schedule.id)}>
+              <div className="p-4">
+                <div className="flex flex-wrap gap-4">
+                  {schedule.program_image_url ? (
+                    <CardMedia
+                      sx={{
+                        width: { xs: '100%', sm: 220 },
+                        height: { xs: 'auto', sm: 123.75 },
+                        minHeight: { xs: 120, sm: 123.75 }, // Ensures the image remains visible at small sizes
+                        borderRadius: 2,
+                        backgroundColor: 'var(--secondary-background)',
+                        backgroundPosition: 'center',
+                        backgroundSize: 'contain',
+                        backgroundRepeat: 'no-repeat', // Prevents tiling of the image
+                      }}
                       image={schedule.program_image_url}
-                      title="green iguana"
-                    /> : <div style={{ borderRadius: 26, width: 220, height: 123.75, backgroundColor: "var(--secondary-background)" }}></div>}
-
-                    <CardContent sx={{ width: 'calc(100% - 220px - 1rem)' }} className='program-card'>
-                      <div className='flex justify-between items-center pb-3'>
-                        <div>
-                          <h4 className='pb-1'>{schedule.program_name}</h4>
-                          <Chip className='program-chip' label={schedule.age_group} variant="outlined" />
-                        </div>
-                        {userDetails.isLoggedin && <FormControl sx={{ minWidth: 220 }} required>
-                          <InputLabel id={String(schedule.id) + 'select'}>Select Student</InputLabel>
+                      title="Program Image"
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        borderRadius: 26,
+                        width: { xs: '100%', sm: 220 },
+                        height: { xs: 'auto', sm: 123.75 },
+                        backgroundColor: 'var(--secondary-background)',
+                      }}
+                    />
+                  )}
+          
+                  <CardContent
+                    sx={{
+                      width: { xs: '100%', sm: 'calc(100% - 240px)' },
+                      mt: { xs: 2, sm: 0 },
+                    }}
+                    className="program-card"
+                  >
+                    <div className="flex justify-between items-center pb-3 flex-wrap">
+                      <div>
+                        <h4 className="pb-1">{schedule.program_name}</h4>
+                        <Chip
+                          className="program-chip"
+                          label={formatAgeGroup(schedule.age_group)}
+                          variant="outlined"
+                        />
+                      </div>
+                      {userDetails.isLoggedin && (
+                        <FormControl sx={{ minWidth: 220, mt: { xs: 2, sm: 0 } }} required>
+                          <InputLabel id={`${schedule.id}select`}>Select Student</InputLabel>
                           <Select
                             id={String(schedule.id)}
                             value={studentSelectData[schedule.id]}
-                            labelId={String(schedule.id) + 'select'}
+                            labelId={`${schedule.id}select`}
                             label="Select Student"
-                            onChange={(e) => { formChange(e, schedule.id) }}
+                            onChange={(e) => formChange(e, schedule.id)}
                           >
-                            <MenuItem className='text-color-primary-1' value='add_student'>
+                            <MenuItem className="text-color-primary-1" value="add_student">
                               Add Student...
                             </MenuItem>
-                            {
-                              userDetails.student.map((student) => {
-                                return <MenuItem key={student.id} value={student.id}>{student.firstname} {student.lastname}</MenuItem>
-                              })
-                            }
+                            {userDetails.student.map((student) => (
+                              <MenuItem key={student.id} value={student.id}>
+                                {student.firstname} {student.lastname}
+                              </MenuItem>
+                            ))}
                           </Select>
-                        </FormControl>}
+                        </FormControl>
+                      )}
+                    </div>
+                    <p>{schedule.program_description}</p>
+                    <div className="flex items-center justify-between w-full pt-4 flex-wrap gap-2">
+                      <div className="flex gap-2">
+                        {week_days.map((week) => {
+                          const isIncluded = Array.isArray(schedule.days) && schedule.days.includes(week.value);
+                          return (
+                            <div
+                              style={{
+                                borderRadius: 8,
+                                border: isIncluded ? '3px solid var(--primary-color-1)' : '1px solid',
+                              }}
+                              className="program-week"
+                              key={week.value}
+                            >
+                              {week.display}
+                            </div>
+                          );
+                        })}
                       </div>
-                      <p>{schedule.program_description}</p>
-                      <div className='flex items-center justify-between w-full pt-4'>
-                        <div className='flex gap-2'>
-                          {week_days.map(week => {
-                            return <div style={{ borderRadius: 8, border: `${schedule.days == week.value ? '3px solid var(--primary-color-1)' : '1px solid'}` }} className='program-week' key={week.value}>{week.display}</div>
-                          })}
-                        </div>
-                        <p className='text-color-primary-1'><CalendarTodayIcon fontSize='small' className='pr-1'></CalendarTodayIcon>{new Date(schedule.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - {new Date(schedule.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                        <p className='text-color-primary-1'><AccessTimeIcon fontSize='small' className='pr-1'></AccessTimeIcon>{dayjs.tz(schedule.start_time, 'UTC').format('h:mm A')} - {dayjs.tz(schedule.end_time, 'UTC').format('h:mm A')}</p>
+                      <p className="text-color-primary-1 flex items-center">
+                        <CalendarTodayIcon fontSize="small" className="pr-1" />
+                        {new Date(schedule.start_date).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                        {' - '}
+                        {new Date(schedule.end_date).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </p>
+                      <p className="text-color-primary-1 flex items-center">
+                        <AccessTimeIcon fontSize="small" className="pr-1" />
+                        {dayjs.tz(schedule.start_time, 'UTC').format('h:mm A')} - {dayjs.tz(schedule.end_time, 'UTC').format('h:mm A')}
+                      </p>
+                    </div>
+                    {schedule.no_class_dates.length > 0 && (
+                      <div className="mt-3">
+                        <p className="font-bold">No classes will be held on:</p>
+                        <ul className="list-unstyled">
+                          {schedule.no_class_dates.map((date) => (
+                            <li key={date}>
+                              <span className="text-sm text-danger">
+                                {new Date(date).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                })}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                      <div className='text-end pt-4 flex justify-between gap-4 items-center'>
-                        <p className='font-bold'>Available Slots: {schedule.currently_available}</p>
-                        <div className='flex items-center gap-4'>
-                          <p className='text-3xl text-color-primary-3'>${schedule.price}</p>
-                          <Button type='submit' variant='contained'>{schedule.currently_available == 0 ? 'Add to Waitlist' : 'Add to Cart'}</Button>
-                        </div>
+                    )}
+                    <div className="flex justify-between gap-4 items-center pt-4 flex-wrap">
+                      <p className="font-bold">Available Slots: {schedule.currently_available}</p>
+                      <div className="flex items-center gap-4">
+                        <p className="text-3xl text-color-primary-3">${schedule.price}</p>
+                        <Button type="submit" variant="contained">
+                          {schedule.currently_available === 0 ? 'Add to Waitlist' : 'Add to Cart'}
+                        </Button>
                       </div>
-                    </CardContent>
-                  </div>
+                    </div>
+                  </CardContent>
                 </div>
-              </form>
-            </Card>
+              </div>
+            </form>
+          </Card>          
           })}</> : <p className='text-2xl text-center pt-4'>No Active Programs found for this school</p>}
         </div>
       </Fragment>
