@@ -17,6 +17,7 @@ const ProgramDetail = ({ program }) => {
                         />
                     </Card>
                 </div>
+                
                 <div className="md:w-1/2 p-4">
                     <Card>
                         <CardContent>

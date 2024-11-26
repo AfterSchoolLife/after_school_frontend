@@ -1,4 +1,4 @@
-import ProgramDetail from './ProgramDetail';
+import ProgramDetail from './programDetail';
 import axiosInstance from '@components/axiosInstance';
 
 export default async function ProgramPage({ params }) {
