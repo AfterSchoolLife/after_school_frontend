@@ -11,11 +11,11 @@ export default async function ProgramPage({ params }) {
 }
 
 // Optional: Use this if you're generating static pages during build time
-// export async function generateStaticParams() {
-//     const response = await axiosInstance.get('/api/v1/programs');
-//     const programs = response.data;
+export async function generateStaticParams() {
+    const response = await axiosInstance.get('/api/v1/programs');
+    const programs = response.data;
 
-//     return programs.map((program) => ({
-//         id: program.id.toString(),
-//     }));
-// }
+    return programs.map((program) => ({
+        id: program.id.toString(),
+    }));
+}

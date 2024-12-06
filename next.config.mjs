@@ -6,7 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const nextConfig = {
     reactStrictMode: false,
-    // output: 'export',
+    output: 'standalone',
     images: { unoptimized: true }
     // sassOptions: {
     //     includePaths: [path.join(__dirname, 'styles')],
