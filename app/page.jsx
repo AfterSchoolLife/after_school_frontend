@@ -12,7 +12,7 @@ const Home = () => {
             WANT TO REGISTER FOR AN AFTER SCHOOL PROGRAM?
           </h3>
           <div className="flex justify-center md:justify-start mt-4">
-            <Link href="/program">
+            <Link href="/school">
               <Button variant="contained" color="primary3" className="text-sm md:text-base">
                 <h5>Click here</h5>
               </Button>
