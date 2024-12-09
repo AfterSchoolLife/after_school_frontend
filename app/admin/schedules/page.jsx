@@ -202,57 +202,107 @@ const ScheduleAdmin = () => {
   };
 
   const setupRoster = (scheduleData) => {
-    axiosInstance.get(`/api/v1/purchaseds/getStudentInfoSchedule/${scheduleData.id}`).then((studentInfo) => {
-      fetch('/after_school_roster.xlsx')
-        .then((response) => response.arrayBuffer())
-        .then((buffer) => {
-          const workbook = new ExcelJS.Workbook();
-          return workbook.xlsx.load(buffer);
-        })
-        .then((workbook) => {
-          const worksheet = workbook.getWorksheet(1);
-          studentInfo.data.forEach((student, index) => {
-            worksheet.addRow([index + 1, student.firstname,
-            student.lastname, student.grade, '', '', '', '', student.user.parent_1_phone_number, student.pickup, '']);
-          });
-
-          let getSessions = countSessions(scheduleData.start_date, scheduleData.end_date, getDayInt[scheduleData.days]);
-          const cell = worksheet.getCell('F5'); // Example: cell A2
-          cell.value = getSessions;
-
-          Object.keys(excelCellData).forEach(key => {
-            const cell = worksheet.getCell(key);
-
-            if (excelCellData[key].endsWith('date')) {
-              const date_v = scheduleData[excelCellData[key]];
-              cell.value = new Date(date_v).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            } else if (excelCellData[key] === 'day_time') {
-              const start_time = dayjs.tz(scheduleData.start_time, 'UTC').format('h:mm A');
-              const end_time = dayjs.tz(scheduleData.end_time, 'UTC').format('h:mm A');
-              cell.value = `${scheduleData.days.join(', ')} ${start_time} - ${end_time}`;
-            } else {
-              cell.value = scheduleData[excelCellData[key]];
+    // Fetch start_date, end_date, days, and no_class_dates from a different API
+    axiosInstance.get(`/api/v1/schedules/${scheduleData.id}`).then((scheduleDetails) => {
+      const { start_date, end_date, days, no_class_dates } = scheduleDetails.data;
+  
+      axiosInstance.get(`/api/v1/purchaseds/getStudentInfoSchedule/${scheduleData.id}`).then((studentInfo) => {
+        fetch('/after_school_roster.xlsx')
+          .then((response) => response.arrayBuffer())
+          .then((buffer) => {
+            const workbook = new ExcelJS.Workbook();
+            return workbook.xlsx.load(buffer);
+          })
+          .then((workbook) => {
+            const worksheet = workbook.getWorksheet(1);
+  
+            // Convert the days array to a set for quick lookups
+            const validDays = new Set(days);
+  
+            // Convert no_class_dates to a Set for quick lookups
+            const noClassDatesSet = new Set(no_class_dates.map((date) => new Date(date).toDateString()));
+  
+            // Calculate all dates between start_date and end_date
+            const startDate = new Date(start_date);
+            const endDate = new Date(end_date);
+  
+            const dates = [];
+  
+            for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
+              const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+  
+              // Exclude dates not in validDays or in no_class_dates
+              if (validDays.has(dayName) && !noClassDatesSet.has(date.toDateString())) {
+                dates.push(new Date(date));
+              }
             }
+  
+            // Write data starting from row 6 and column L (index 12)
+            dates.forEach((date, index) => {
+              const columnIndex = 12 + index; // Start from column L (12) and move to the next columns
+              worksheet.getRow(10).getCell(columnIndex).value = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            });
+  
+            // Populate student info
+            studentInfo.data.forEach((student, index) => {
+              const row = worksheet.addRow([
+                index + 1,
+                student.firstname,
+                student.lastname,
+                student.grade,
+                '', '', '', '', // Empty cells for placeholder columns
+                student.user.parent_1_phone_number,
+                student.pickup,
+                ''
+              ]);
+  
+              // Optionally, add placeholders for the dynamic date columns starting from column L
+              dates.forEach((_, dateIndex) => {
+                row.getCell(12 + dateIndex).value = ''; // Adjust starting column index to 12 (L) and onwards
+              });
+            });
+  
+            // Add dynamic session information or other data
+            const cell = worksheet.getCell('F5'); // Example: cell F5
+            cell.value = dates.length; // Set the value to the length of the dates array
+
+            // Map other fields to specific cells
+            Object.keys(excelCellData).forEach((key) => {
+              const cell = worksheet.getCell(key);
+  
+              if (excelCellData[key].endsWith('date')) {
+                const date_v = scheduleData[excelCellData[key]];
+                cell.value = new Date(date_v).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+              } else if (excelCellData[key] === 'day_time') {
+                const start_time = dayjs.tz(scheduleData.start_time, 'UTC').format('h:mm A');
+                const end_time = dayjs.tz(scheduleData.end_time, 'UTC').format('h:mm A');
+                cell.value = `${scheduleData.days.join(', ')} ${start_time} - ${end_time}`;
+              } else {
+                cell.value = scheduleData[excelCellData[key]];
+              }
+            });
+  
+            // Generate the modified Excel file as a blob
+            return workbook.xlsx.writeBuffer();
+          })
+          .then((modifiedData) => {
+            // Create a Blob from the buffer
+            const blob = new Blob([modifiedData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  
+            // Create a download link and trigger the download
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'modified_sample.xlsx';
+            link.click();
+          })
+          .catch((error) => {
+            console.error('Error:', error);
           });
-
-          // Generate the modified Excel file as a blob
-          return workbook.xlsx.writeBuffer();
-        })
-        .then((modifiedData) => {
-          // Create a Blob from the buffer
-          const blob = new Blob([modifiedData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-
-          // Create a download link and trigger the download
-          const link = document.createElement('a');
-          link.href = URL.createObjectURL(blob);
-          link.download = 'modified_sample.xlsx';
-          link.click();
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-        });
-    }).catch(() => { });
-  };
+      }).catch(() => { });
+    }).catch((error) => {
+      console.error('Error fetching schedule details:', error);
+    });
+  };  
 
   const fetchSelectDetails = () => {
     axiosInstance.get(`/api/v1/schedules/getAdminAll`).then((response) => {
